@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type CSSProperties } from "react";
+import Link from "next/link";
 import {
   ResponsiveContainer,
   LineChart,
@@ -46,15 +47,15 @@ function Bar({ pct, color }: { pct: number; color: string }) {
 }
 
 export default function BattleDashboard({ state }: { state: DashboardState }) {
-    const [view, setView] = useState<"total" | "persdr">("total");
+  const [view, setView] = useState<"total" | "persdr">("total");
 
-    const leader: TeamId | null =
-          state.teams.TEAM_1.totalPoints === state.teams.TEAM_2.totalPoints
-        ? null
-            : state.teams.TEAM_1.totalPoints > state.teams.TEAM_2.totalPoints
-        ? "TEAM_1"
-            : "TEAM_2";
-  
+  const leader: TeamId | null =
+    state.teams.TEAM_1.totalPoints === state.teams.TEAM_2.totalPoints
+      ? null
+      : state.teams.TEAM_1.totalPoints > state.teams.TEAM_2.totalPoints
+      ? "TEAM_1"
+      : "TEAM_2";
+
   const historyData = state.battleHistory.map((h) => ({
     date: fmtDateShort(h.date),
     "Team 1": h.teamPoints.TEAM_1,
@@ -67,7 +68,13 @@ export default function BattleDashboard({ state }: { state: DashboardState }) {
       <header className="sticky top-0 z-20 backdrop-blur bg-[#070b16]/85 border-b border-white/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <span className="font-pixel text-[9px] tracking-widest text-cyan-300">MAPON OUTBOUND BATTLE</span>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1 font-mono-stat text-[10px] text-slate-500 hover:text-cyan-300 transition-colors mb-1.5"
+            >
+              ← Menú
+            </Link>
+            <span className="block font-pixel text-[9px] tracking-widest text-cyan-300">MAPON OUTBOUND BATTLE</span>
             <h1 className="font-display text-2xl sm:text-3xl text-white leading-none mt-1">
               🎮 SCOREBOARD <span className="text-cyan-300">EN VIVO</span>
             </h1>
@@ -117,7 +124,7 @@ export default function BattleDashboard({ state }: { state: DashboardState }) {
             const meta = TEAMS[teamId];
             const Avatar = avatarFor(teamId);
             const isLeader = leader === teamId;
-      const rivalColor = teamId === "TEAM_1" ? TEAMS.TEAM_2.color : TEAMS.TEAM_1.color;
+            const rivalColor = teamId === "TEAM_1" ? TEAMS.TEAM_2.color : TEAMS.TEAM_1.color;
             return (
               <div
                 key={teamId}
@@ -149,7 +156,8 @@ export default function BattleDashboard({ state }: { state: DashboardState }) {
                 </div>
                 <div className="font-mono-stat text-4xl font-bold" style={{ color: meta.color }}>
                   {team.totalPoints}
-                                <span className="text-sm text-slate-400 ml-1">pts</span></div>
+                  <span className="text-sm text-slate-400 ml-1">pts</span>
+                </div>
                 <div className="w-full">
                   <div className="flex justify-between text-[10px] text-slate-400 mb-1">
                     <span>
@@ -427,7 +435,10 @@ const PER_SDR_COLUMNS: { key: string; label: string; align?: "right" }[] = [
 
 function PerSdrTable({ state }: { state: DashboardState }) {
   return (
-    <section className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+    // Full width, stacked (not side-by-side): each team's table has 8
+    // columns, and squeezing two into a half-width column forced a lateral
+    // scrollbar. Landscape/full-width per table avoids that entirely.
+    <section className="grid grid-cols-1 gap-6 mb-10">
       {TEAM_IDS.map((teamId) => {
         const meta = TEAMS[teamId];
         const rows = state.perSdr.filter((s) => s.team === teamId).sort((a, b) => b.calls - a.calls);
