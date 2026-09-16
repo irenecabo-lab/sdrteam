@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -46,27 +46,15 @@ function Bar({ pct, color }: { pct: number; color: string }) {
 }
 
 export default function BattleDashboard({ state }: { state: DashboardState }) {
-  const [view, setView] = useState<"total" | "normalized" | "persdr">("total");
+    const [view, setView] = useState<"total" | "persdr">("total");
 
-  const teamSize: Record<TeamId, number> = useMemo(
-    () => ({ TEAM_1: ownersByTeam("TEAM_1").length, TEAM_2: ownersByTeam("TEAM_2").length }),
-    []
-  );
-
-  const leader: TeamId | null =
-    state.teams.TEAM_1.totalPoints === state.teams.TEAM_2.totalPoints
-      ? null
-      : state.teams.TEAM_1.totalPoints > state.teams.TEAM_2.totalPoints
-      ? "TEAM_1"
-      : "TEAM_2";
-
-  const normalizedLeader: TeamId | null = (() => {
-    const n1 = state.teams.TEAM_1.totalPoints / teamSize.TEAM_1;
-    const n2 = state.teams.TEAM_2.totalPoints / teamSize.TEAM_2;
-    if (n1 === n2) return null;
-    return n1 > n2 ? "TEAM_1" : "TEAM_2";
-  })();
-
+    const leader: TeamId | null =
+          state.teams.TEAM_1.totalPoints === state.teams.TEAM_2.totalPoints
+        ? null
+            : state.teams.TEAM_1.totalPoints > state.teams.TEAM_2.totalPoints
+        ? "TEAM_1"
+            : "TEAM_2";
+  
   const historyData = state.battleHistory.map((h) => ({
     date: fmtDateShort(h.date),
     "Team 1": h.teamPoints.TEAM_1,
@@ -107,7 +95,6 @@ export default function BattleDashboard({ state }: { state: DashboardState }) {
           <div className="inline-flex rounded-full bg-white/5 border border-white/10 p-1 gap-1">
             {[
               { id: "total", label: "TOTAL" },
-              { id: "normalized", label: "NORMALIZADO / SDR" },
               { id: "persdr", label: "POR SDR" },
             ].map((opt) => (
               <button
@@ -129,10 +116,8 @@ export default function BattleDashboard({ state }: { state: DashboardState }) {
             const team = state.teams[teamId];
             const meta = TEAMS[teamId];
             const Avatar = avatarFor(teamId);
-            const isLeader = view === "normalized" ? normalizedLeader === teamId : leader === teamId;
-            const normalized = team.totalPoints / teamSize[teamId];
-            const displayPoints = view === "normalized" ? normalized : team.totalPoints;
-            const rivalColor = teamId === "TEAM_1" ? TEAMS.TEAM_2.color : TEAMS.TEAM_1.color;
+            const isLeader = leader === teamId;
+      const rivalColor = teamId === "TEAM_1" ? TEAMS.TEAM_2.color : TEAMS.TEAM_1.color;
             return (
               <div
                 key={teamId}
@@ -163,9 +148,8 @@ export default function BattleDashboard({ state }: { state: DashboardState }) {
                   </div>
                 </div>
                 <div className="font-mono-stat text-4xl font-bold" style={{ color: meta.color }}>
-                  {displayPoints.toFixed(view === "normalized" ? 1 : 0)}
-                  <span className="text-sm text-slate-400 ml-1">pts{view === "normalized" ? "/sdr" : ""}</span>
-                </div>
+                  {team.totalPoints}
+                                <span className="text-sm text-slate-400 ml-1">pts</span></div>
                 <div className="w-full">
                   <div className="flex justify-between text-[10px] text-slate-400 mb-1">
                     <span>
@@ -366,7 +350,7 @@ function MiniStat({ label, value }: { label: string; value: number | string }) {
 }
 
 // Always-visible roster panel right under the team cards - who's doing what,
-// person by person, regardless of which view (TOTAL/NORMALIZADO/POR SDR) is
+// person by person, regardless of which view (TOTAL/POR SDR) is
 // selected below.
 function MemberBreakdown({ state }: { state: DashboardState }) {
   const numDays = competitionDates().length;
@@ -431,45 +415,101 @@ function MemberBreakdown({ state }: { state: DashboardState }) {
   );
 }
 
+const PER_SDR_COLUMNS: { key: string; label: string; align?: "right" }[] = [
+  { key: "calls", label: "📞 Llamadas", align: "right" },
+  { key: "talkTimeMinutes", label: "⏱ Min. hablados", align: "right" },
+  { key: "qualityCalls", label: "🔥 Llam. de calidad", align: "right" },
+  { key: "meetingsBooked", label: "📅 Agendadas", align: "right" },
+  { key: "meetingsHeld", label: "✅ Celebradas", align: "right" },
+  { key: "biggestFleet", label: "🐘 Flota máx.", align: "right" },
+  { key: "pipelineEur", label: "💰 Pipeline", align: "right" },
+];
+
 function PerSdrTable({ state }: { state: DashboardState }) {
   return (
     <section className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
       {TEAM_IDS.map((teamId) => {
         const meta = TEAMS[teamId];
         const rows = state.perSdr.filter((s) => s.team === teamId).sort((a, b) => b.calls - a.calls);
+        const topCallerId = rows[0]?.ownerId;
         return (
-          <div key={teamId} className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
-            <div className="font-display text-lg mb-3 text-center" style={{ color: meta.color }}>
-              {meta.name}
+          <div
+            key={teamId}
+            className="rounded-2xl border overflow-hidden"
+            style={{ borderColor: `${meta.color}33`, background: `linear-gradient(160deg, ${meta.color}0d, transparent)` }}
+          >
+            <div
+              className="px-5 py-3 border-b flex items-center justify-between"
+              style={{ borderColor: `${meta.color}33` }}
+            >
+              <span className="font-display text-lg" style={{ color: meta.color }}>
+                {meta.name}
+              </span>
+              <span className="font-pixel text-[9px] tracking-widest text-slate-500">
+                {rows.length} SDR{rows.length === 1 ? "" : "s"}
+              </span>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-xs">
+              <table className="w-full text-[11px] sm:text-xs border-collapse">
                 <thead>
-                  <tr className="text-slate-500 text-left">
-                    <th className="py-1 pr-2">SDR</th>
-                    <th className="py-1 pr-2 text-right">📞</th>
-                    <th className="py-1 pr-2 text-right">⏱min</th>
-                    <th className="py-1 pr-2 text-right">🔥+3m</th>
-                    <th className="py-1 pr-2 text-right">📅</th>
-                    <th className="py-1 pr-2 text-right">✅</th>
-                    <th className="py-1 pr-2 text-right">🐘max</th>
-                    <th className="py-1 text-right">💰</th>
+                  <tr className="text-slate-400 text-left bg-white/[0.03]">
+                    <th className="py-2.5 pl-5 pr-3 font-pixel text-[8px] tracking-widest font-normal">SDR</th>
+                    {PER_SDR_COLUMNS.map((col) => (
+                      <th
+                        key={col.key}
+                        className="py-2.5 px-3 text-right font-pixel text-[8px] tracking-widest font-normal whitespace-nowrap"
+                      >
+                        {col.label}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.map((r) => (
-                    <tr key={r.ownerId} className="border-t border-white/5 text-slate-200">
-                      <td className="py-1.5 pr-2 font-medium">{r.name}</td>
-                      <td className="py-1.5 pr-2 text-right font-mono-stat">{r.calls}</td>
-                      <td className="py-1.5 pr-2 text-right font-mono-stat">{r.talkTimeMinutes}</td>
-                      <td className="py-1.5 pr-2 text-right font-mono-stat">{r.qualityCalls}</td>
-                      <td className="py-1.5 pr-2 text-right font-mono-stat">{r.meetingsBooked}</td>
-                      <td className="py-1.5 pr-2 text-right font-mono-stat">{r.meetingsHeld}</td>
-                      <td className="py-1.5 pr-2 text-right font-mono-stat">{r.biggestFleet || "—"}</td>
-                      <td className="py-1.5 text-right font-mono-stat">{fmtEur(r.pipelineEur)}</td>
+                  {rows.map((r, idx) => (
+                    <tr
+                      key={r.ownerId}
+                      className={`border-t border-white/5 text-slate-200 hover:bg-white/[0.03] transition-colors ${
+                        idx % 2 === 1 ? "bg-white/[0.015]" : ""
+                      }`}
+                    >
+                      <td className="py-2.5 pl-5 pr-3 font-medium whitespace-nowrap">
+                        {r.name}
+                        {r.ownerId === topCallerId && <span className="ml-1.5">🥇</span>}
+                      </td>
+                      <td className="py-2.5 px-3 text-right font-mono-stat">{r.calls}</td>
+                      <td className="py-2.5 px-3 text-right font-mono-stat">{r.talkTimeMinutes}</td>
+                      <td className="py-2.5 px-3 text-right font-mono-stat">{r.qualityCalls}</td>
+                      <td className="py-2.5 px-3 text-right font-mono-stat">{r.meetingsBooked}</td>
+                      <td className="py-2.5 px-3 text-right font-mono-stat">{r.meetingsHeld}</td>
+                      <td className="py-2.5 px-3 text-right font-mono-stat">{r.biggestFleet || "—"}</td>
+                      <td className="py-2.5 pl-3 pr-5 text-right font-mono-stat">{fmtEur(r.pipelineEur)}</td>
                     </tr>
                   ))}
                 </tbody>
+                <tfoot>
+                  <tr className="border-t-2 text-slate-300 font-semibold" style={{ borderColor: `${meta.color}33` }}>
+                    <td className="py-2.5 pl-5 pr-3 font-pixel text-[8px] tracking-widest text-slate-500">TOTAL</td>
+                    <td className="py-2.5 px-3 text-right font-mono-stat">{rows.reduce((a, r) => a + r.calls, 0)}</td>
+                    <td className="py-2.5 px-3 text-right font-mono-stat">
+                      {rows.reduce((a, r) => a + r.talkTimeMinutes, 0)}
+                    </td>
+                    <td className="py-2.5 px-3 text-right font-mono-stat">
+                      {rows.reduce((a, r) => a + r.qualityCalls, 0)}
+                    </td>
+                    <td className="py-2.5 px-3 text-right font-mono-stat">
+                      {rows.reduce((a, r) => a + r.meetingsBooked, 0)}
+                    </td>
+                    <td className="py-2.5 px-3 text-right font-mono-stat">
+                      {rows.reduce((a, r) => a + r.meetingsHeld, 0)}
+                    </td>
+                    <td className="py-2.5 px-3 text-right font-mono-stat">
+                      {Math.max(0, ...rows.map((r) => r.biggestFleet || 0)) || "—"}
+                    </td>
+                    <td className="py-2.5 pl-3 pr-5 text-right font-mono-stat">
+                      {fmtEur(rows.reduce((a, r) => a + r.pipelineEur, 0))}
+                    </td>
+                  </tr>
+                </tfoot>
               </table>
             </div>
           </div>
