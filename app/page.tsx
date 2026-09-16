@@ -5,8 +5,9 @@ import { COMPETITION } from "@/config/scoring.config";
 // #1F292F, one confident lime green #98CA02 (secondary #65B200) as the only
 // accent, clean sans-serif type, no emoji, no arcade/pixel styling. Add new
 // games to GAMES as they're built; "soon" entries render as locked
-// placeholders so the hall visibly has room to grow. Each game gets its own
-// accent color so cards read as distinct products under one shared shell.
+// placeholders so the hall visibly has room to grow. Layout reads as an
+// actual hall: the active game(s) are the centered main entrance, with
+// "coming soon" games as smaller doors underneath.
 type GameEntry = {
   id: string;
   eyebrow: string;
@@ -46,6 +47,9 @@ const GAMES: GameEntry[] = [
 ];
 
 export default function Home() {
+  const activeGames = GAMES.filter((g) => g.status === "active");
+  const soonGames = GAMES.filter((g) => g.status === "soon");
+
   return (
     <main
       className="min-h-screen relative overflow-hidden px-6 py-12 sm:py-16"
@@ -70,7 +74,7 @@ export default function Home() {
           </span>
         </div>
 
-        <div className="mb-12">
+        <div className="flex flex-col items-center text-center mb-14">
           <span className="inline-block text-[11px] font-semibold tracking-widest uppercase text-[#98CA02] bg-[#98CA02]/10 border border-[#98CA02]/30 rounded-full px-3 py-1 mb-5">
             Sala de juegos
           </span>
@@ -82,43 +86,51 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          {GAMES.map((game) =>
-            game.status === "active" ? (
-              <a
-                key={game.id}
-                href={game.href}
-                className="rounded-2xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.07] transition-colors p-6 flex flex-col gap-3 text-left"
+        {/* Main entrance: the active game(s), centered like a hall's front door */}
+        <div className="flex flex-wrap justify-center gap-5 mb-12">
+          {activeGames.map((game) => (
+            <a
+              key={game.id}
+              href={game.href}
+              className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.07] transition-colors p-8 flex flex-col gap-3 text-left"
+            >
+              <span
+                className="text-[10px] font-semibold tracking-widest uppercase"
+                style={{ color: game.accent }}
               >
-                <span
-                  className="text-[10px] font-semibold tracking-widest uppercase"
-                  style={{ color: game.accent }}
-                >
-                  {game.eyebrow}
-                </span>
-                <span className="text-xl font-bold text-white">{game.name}</span>
-                <span className="text-[13px] text-slate-400 flex-1">{game.tagline}</span>
-                <span
-                  className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-widest uppercase"
-                  style={{ color: game.accent }}
-                >
-                  Jugar <span aria-hidden>→</span>
-                </span>
-              </a>
-            ) : (
-              <div
-                key={game.id}
-                className="rounded-2xl border border-white/5 bg-white/[0.02] p-6 flex flex-col gap-3 opacity-50"
+                {game.eyebrow}
+              </span>
+              <span className="text-2xl font-bold text-white">{game.name}</span>
+              <span className="text-[13px] text-slate-400 flex-1">{game.tagline}</span>
+              <span
+                className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-widest uppercase"
+                style={{ color: game.accent }}
               >
-                <span className="text-[10px] font-semibold tracking-widest uppercase text-slate-600">
-                  {game.eyebrow}
-                </span>
-                <span className="text-xl font-bold text-slate-500">{game.name}</span>
-                <span className="text-[13px] text-slate-600 flex-1">{game.tagline}</span>
-              </div>
-            )
-          )}
+                Jugar <span aria-hidden>→</span>
+              </span>
+            </a>
+          ))}
         </div>
+
+        {/* Side doors: what's coming next, smaller and centered underneath */}
+        {soonGames.length > 0 && (
+          <div className="flex flex-col items-center gap-4">
+            <span className="text-[10px] font-semibold tracking-widest uppercase text-slate-600">
+              Próximamente
+            </span>
+            <div className="flex flex-wrap justify-center gap-4">
+              {soonGames.map((game) => (
+                <div
+                  key={game.id}
+                  className="w-44 rounded-xl border border-white/5 bg-white/[0.02] p-5 flex flex-col gap-2 opacity-50"
+                >
+                  <span className="text-xl font-bold text-slate-500">{game.name}</span>
+                  <span className="text-[12px] text-slate-600">{game.tagline}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );
