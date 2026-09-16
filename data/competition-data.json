@@ -1,5 +1,5 @@
 {
-  "_comment": "PRUEBA REAL TEMPORAL (16-18 sept 2026, ventana movida en scoring.config.ts) - datos reales sacados de HubSpot vía MCP para validar el pipeline antes del lanzamiento real del 22. Se resetea el viernes 18/9 y la ventana vuelve a 22-30/9.",
+  "_comment": "PRUEBA REAL TEMPORAL (16-18 sept 2026, ventana movida en scoring.config.ts) - datos reales sacados de HubSpot via MCP para validar el pipeline antes del lanzamiento real del 22. CORREGIDO 16/9/26 tarde: se filtraron meetings y deals para quedarnos solo con los realmente outbound + new-business (lead_master_source=false y company_master_type != Existing client), igual que hace fetchDealsInScope()/fetchMeetings() en el codigo real. La primera pasada incluia por error reuniones y deals inbound o de cliente existente. Se resetea el viernes 18/9 y la ventana vuelve a 22-30/9.",
   "dailyActivity": [
     { "ownerId": "44080801", "date": "2026-09-16", "calls": 24, "talkTimeMinutes": 32, "qualityCalls": 3 },
     { "ownerId": "33763722", "date": "2026-09-16", "calls": 45, "talkTimeMinutes": 38, "qualityCalls": 2 },
@@ -7,22 +7,12 @@
     { "ownerId": "78282993", "date": "2026-09-16", "calls": 41, "talkTimeMinutes": 23, "qualityCalls": 1 },
     { "ownerId": "30080242", "date": "2026-09-16", "calls": 56, "talkTimeMinutes": 42, "qualityCalls": 4 }
   ],
-  "dealStageEvents": [
-    { "dealId": "521621485799", "dealName": "noMohamedElhatmi new lead", "companyName": "", "ownerId": "78282993", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-16T07:39:21.207Z" }
-  ],
+  "dealStageEvents": [],
   "meetings": [
-    { "meetingId": "520075253972", "dealId": "", "dealName": "", "companyName": "", "ownerId": "44080801", "bookedAt": "2026-09-16T12:57:15.702Z", "meetingAt": "2026-09-16T12:57:05.961Z", "outcome": "COMPLETED" },
-    { "meetingId": "520046287069", "dealId": "", "dealName": "", "companyName": "", "ownerId": "33763722", "bookedAt": "2026-09-16T11:15:07.821Z", "meetingAt": "2026-09-22T09:00:00Z", "outcome": "CANCELED" },
-    { "meetingId": "520046696685", "dealId": "", "dealName": "Securitas-Mapon (plan Q4, T&R, new projects, agreement status)", "companyName": "", "ownerId": "30080243", "bookedAt": "2026-09-16T10:55:43.964Z", "meetingAt": "2026-10-02T09:30:00Z", "outcome": "SCHEDULED" },
-    { "meetingId": "520046508272", "dealId": "", "dealName": "Alfanordic-Mapon (plan Q4: tacho, temperature & T&R)", "companyName": "", "ownerId": "30080243", "bookedAt": "2026-09-16T10:44:30.840Z", "meetingAt": "2026-09-17T12:00:00Z", "outcome": "SCHEDULED" },
-    { "meetingId": "519957250297", "dealId": "", "dealName": "", "companyName": "", "ownerId": "44080801", "bookedAt": "2026-09-16T09:11:33.564Z", "meetingAt": "2026-09-16T09:11:26.887Z", "outcome": "COMPLETED" },
-    { "meetingId": "519954176191", "dealId": "", "dealName": "", "companyName": "", "ownerId": "44080801", "bookedAt": "2026-09-16T08:57:39.327Z", "meetingAt": "2026-09-16T08:57:22.142Z", "outcome": "COMPLETED" },
-    { "meetingId": "519953594579", "dealId": "", "dealName": "", "companyName": "", "ownerId": "30080242", "bookedAt": "2026-09-16T08:32:43.029Z", "meetingAt": "2026-09-16T08:32:23.732Z", "outcome": "COMPLETED" },
-    { "meetingId": "519952827632", "dealId": "", "dealName": "", "companyName": "", "ownerId": "78282993", "bookedAt": "2026-09-16T07:51:43.710Z", "meetingAt": "2026-09-16T07:51:31.561Z", "outcome": "COMPLETED" }
+    { "meetingId": "519953594579", "dealId": "499024537796", "dealName": "RAESGRA, S.L. - New Deal", "companyName": "", "ownerId": "30080242", "bookedAt": "2026-09-16T08:32:43.029Z", "meetingAt": "2026-09-16T08:32:23.732Z", "outcome": "COMPLETED", "fleetSize": 60 },
+    { "meetingId": "518372186350", "dealId": "443984852191", "dealName": "Virtón - New Deal", "companyName": "", "ownerId": "30080242", "bookedAt": "2026-09-09T13:08:19.112Z", "meetingAt": "2026-09-17T14:00:00Z", "outcome": "SCHEDULED", "fleetSize": 72 },
+    { "meetingId": "514846912747", "dealId": "443581005047", "dealName": "Grupo Elsamex - New Deal", "companyName": "", "ownerId": "30080242", "bookedAt": "2026-08-27T12:27:15.159Z", "meetingAt": "2026-09-18T08:00:00Z", "outcome": "SCHEDULED", "fleetSize": 10 },
+    { "meetingId": "503556285652", "dealId": "499043178720", "dealName": "TAXUS MEDIO AMBIENTE - New Deal", "companyName": "", "ownerId": "33763722", "bookedAt": "2026-07-15T09:23:53.275Z", "meetingAt": "2026-09-16T09:00:00Z", "outcome": "COMPLETED", "fleetSize": 30 }
   ],
-  "pipelineDeals": [
-    { "dealId": "521457362147", "dealName": "GRUPO UNIDAD PALACIOS SL - Nuevo tipo de objeto Deal", "companyName": "", "ownerId": "44080801", "amountEur": 21.80, "createdAt": "2026-09-16T12:54:13.360Z" },
-    { "dealId": "521646918879", "dealName": "umenSara new lead", "companyName": "", "ownerId": "44080801", "amountEur": 39.0, "createdAt": "2026-09-16T09:01:47.474Z" },
-    { "dealId": "521643751665", "dealName": "ÓscarPoveda LeadTheWay agency lead", "companyName": "", "ownerId": "44080801", "amountEur": 47.70, "createdAt": "2026-09-16T05:52:14.248Z" }
-  ]
+  "pipelineDeals": []
 }
