@@ -21,8 +21,19 @@ export async function readCachedSnapshot(): Promise<CompetitionSnapshot | null> 
 }
 
 export async function writeCachedSnapshot(snapshot: CompetitionSnapshot): Promise<void> {
-  await fs.mkdir(CACHE_DIR, { recursive: true });
-  await fs.writeFile(CACHE_FILE, JSON.stringify(snapshot, null, 2), "utf-8");
+  try {
+    await fs.mkdir(CACHE_DIR, { recursive: true });
+    await fs.writeFile(CACHE_FILE, JSON.stringify(snapshot, null, 2), "utf-8");
+  } catch (err) {
+    // Confirmed 16/9/26 on Vercel: the deployment filesystem is read-only,
+    // so this throws ENOENT there every time - best-effort only, never let
+    // it fail the /api/refresh request or show a raw error on the "Refresh
+    // Battle" button. app/battle/page.tsx no longer depends on this cache
+    // for DATA_SOURCE=manual (it always reads live instead); DATA_SOURCE=hubspot
+    // still tries this cache first but will simply miss it on Vercel until
+    // it's swapped for a real persistent store.
+    console.error("writeCachedSnapshot: failed to persist snapshot cache (non-fatal)", err);
+  }
 }
 
 export interface OverrideLogEntry {
