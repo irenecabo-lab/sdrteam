@@ -71,19 +71,10 @@ export default function Home() {
           </span>
         </div>
 
-        <div className="flex flex-col items-center text-center mb-14">
-          <span className="inline-block text-[11px] font-semibold tracking-widest uppercase text-[#98CA02] bg-[#98CA02]/10 border border-[#98CA02]/30 rounded-full px-3 py-1 mb-5">
-            Game hall
-          </span>
-          <p className="text-slate-400 text-sm max-w-md">
-            Los concursos internos del equipo, todos en un mismo sitio.
-          </p>
-        </div>
-
         {/* Main entrance: the active game(s), centered like a hall's front door.
            Each keeps its own arcade identity (cyan neon, burst rays) rather
            than matching the hall's lime/slate shell - it's its own game. */}
-        <div className="flex flex-wrap justify-center gap-5 mb-12">
+        <div className="flex flex-wrap justify-center gap-5 mt-6 mb-12">
           {activeGames.map((game) => (
             <a
               key={game.id}
