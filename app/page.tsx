@@ -1,19 +1,18 @@
 import { COMPETITION } from "@/config/scoring.config";
 
-// Hall / lobby for the Mapon internal games. Matches Mapon's actual internal
-// brand style (per the Kahoot design brief she shared): near-black slate
-// #1F292F, one confident lime green #98CA02 (secondary #65B200) as the only
-// accent, clean sans-serif type, no emoji, no arcade/pixel styling. Add new
-// games to GAMES as they're built; "soon" entries render as locked
-// placeholders so the hall visibly has room to grow. Layout reads as an
-// actual hall: the active game(s) are the centered main entrance, with
-// "coming soon" games as smaller doors underneath.
+// Hall / lobby for the Mapon internal games. Header nav, pill badge and
+// typography stay Mapon-branded (slate #1F292F + lime #98CA02, per the
+// Kahoot design brief). The active game's own card keeps its original
+// arcade identity (cyan neon burst-panel, font-display/font-pixel) so it
+// reads as its own product, distinct from the hall shell around it and
+// from the plain "coming soon" placeholders. Real Mapon wordmark lives at
+// /public/mapon-logo.png (transparent bg, on a white pill so the dark
+// logo stays legible on the dark shell).
 type GameEntry = {
   id: string;
   eyebrow: string;
   name: string;
   tagline: string;
-  accent: string;
   href?: string;
   status: "active" | "soon";
 };
@@ -24,7 +23,6 @@ const GAMES: GameEntry[] = [
     eyebrow: "Competición · Equipo SDR",
     name: "Outbound Battle",
     tagline: `Temporada 1 · ${COMPETITION.startDate} → ${COMPETITION.endDate}`,
-    accent: "#98CA02",
     href: "https://claude.ai/artifact/HGqUakYuZWj2pUN1ibNTKR?sk=uXXD_GQ0G2aM5c5czXF8Ug",
     status: "active",
   },
@@ -33,7 +31,6 @@ const GAMES: GameEntry[] = [
     eyebrow: "Próximamente",
     name: "Nuevo juego",
     tagline: "En camino",
-    accent: "#8492c4",
     status: "soon",
   },
   {
@@ -41,7 +38,6 @@ const GAMES: GameEntry[] = [
     eyebrow: "Próximamente",
     name: "Nuevo juego",
     tagline: "En camino",
-    accent: "#8492c4",
     status: "soon",
   },
 ];
@@ -66,8 +62,9 @@ export default function Home() {
 
       <div className="relative max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-14">
-          <span className="text-lg font-bold tracking-tight text-white">
-            map<span style={{ color: "#98CA02" }}>o</span>n
+          <span className="inline-flex items-center bg-white rounded-md px-2.5 py-1.5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/mapon-logo.png" alt="Mapon" className="h-5 w-auto block" />
           </span>
           <span className="text-[11px] font-semibold tracking-widest uppercase text-slate-500">
             Mapon Spain · Concursos internos
@@ -76,37 +73,39 @@ export default function Home() {
 
         <div className="flex flex-col items-center text-center mb-14">
           <span className="inline-block text-[11px] font-semibold tracking-widest uppercase text-[#98CA02] bg-[#98CA02]/10 border border-[#98CA02]/30 rounded-full px-3 py-1 mb-5">
-            Sala de juegos
+            Game hall
           </span>
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-white leading-tight max-w-xl">
-            Elige a qué <span style={{ color: "#98CA02" }}>jugamos</span>
-          </h1>
-          <p className="text-slate-400 text-sm mt-3 max-w-md">
+          <p className="text-slate-400 text-sm max-w-md">
             Los concursos internos del equipo, todos en un mismo sitio.
           </p>
         </div>
 
-        {/* Main entrance: the active game(s), centered like a hall's front door */}
+        {/* Main entrance: the active game(s), centered like a hall's front door.
+           Each keeps its own arcade identity (cyan neon, burst rays) rather
+           than matching the hall's lime/slate shell - it's its own game. */}
         <div className="flex flex-wrap justify-center gap-5 mb-12">
           {activeGames.map((game) => (
             <a
               key={game.id}
               href={game.href}
-              className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.07] transition-colors p-8 flex flex-col gap-3 text-left"
+              className="game-panel burst-panel relative w-full max-w-sm rounded-2xl border-2 overflow-hidden px-8 py-10 flex flex-col items-center text-center gap-3 transition-transform hover:scale-[1.02]"
+              style={
+                {
+                  borderColor: "#2be3ff55",
+                  background: "linear-gradient(160deg, #2be3ff14, #0e1526)",
+                  "--panel-accent": "#2be3ff",
+                  "--burst-color": "#2be3ff",
+                  "--burst-color-2": "#ff3d7f",
+                } as React.CSSProperties
+              }
             >
-              <span
-                className="text-[10px] font-semibold tracking-widest uppercase"
-                style={{ color: game.accent }}
-              >
-                {game.eyebrow}
+              <span className="text-5xl">🎮</span>
+              <span className="font-display text-2xl sm:text-3xl text-[#2be3ff] [-webkit-text-stroke:1px_#071a2e] drop-shadow-[0_4px_0_#0a3a52]">
+                {game.name.toUpperCase()}
               </span>
-              <span className="text-2xl font-bold text-white">{game.name}</span>
-              <span className="text-[13px] text-slate-400 flex-1">{game.tagline}</span>
-              <span
-                className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-widest uppercase"
-                style={{ color: game.accent }}
-              >
-                Jugar <span aria-hidden>→</span>
+              <span className="font-mono-stat text-[12px] text-slate-400">{game.tagline}</span>
+              <span className="font-display text-base text-amber-300 mt-2 inline-flex items-center gap-1.5">
+                ▶ JUGAR
               </span>
             </a>
           ))}
