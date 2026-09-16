@@ -45,8 +45,8 @@ export const OWNERS: Owner[] = [
 ];
 
 export const TEAMS: Record<TeamId, { id: TeamId; name: string; nickname: string; color: string }> = {
-  TEAM_1: { id: "TEAM_1", name: "TEAM 1", nickname: "Los Cazadores de Pipeline", color: "#2be3ff" },
-  TEAM_2: { id: "TEAM_2", name: "TEAM 2", nickname: "Los Creadores de Oportunidades", color: "#ff3d7f" },
+  TEAM_1: { id: "TEAM_1", name: "TEAM 1", nickname: "Pipeline Hunters", color: "#2be3ff" },
+  TEAM_2: { id: "TEAM_2", name: "TEAM 2", nickname: "Deal Makers", color: "#ff3d7f" },
 };
 
 export function ownerById(ownerId: string): Owner | undefined {
