@@ -197,12 +197,23 @@ async function fetchStageTransitionEvents(dealIds: string[]): Promise<DealStageE
 
 async function fetchMeetings(dealById: Map<string, any>, companyNameByDealId: Map<string, string>): Promise<MeetingRecord[]> {
   const { start, end } = windowFilters();
+  // Filtered by hs_createdate (when the meeting was BOOKED), not
+  // hs_meeting_start_time (when it's scheduled to happen). Confirmed
+  // 16/9/26: lib/scoring/{aggregate,bonuses}.ts gate every meeting-derived
+  // score (agendadas, meetingsHeld, fleet/TOCHA captures, quick capture) on
+  // isWithinCompetitionWindow(bookedAt) - a meeting booked today for a date
+  // weeks out still counts as today's outbound activity, while a meeting
+  // booked weeks ago that merely happens to occur today does not. Filtering
+  // the HubSpot query itself by meeting start time (as this used to) pulled
+  // the wrong set entirely - it missed meetings booked in-window but
+  // scheduled for later, and pulled old meetings just because they landed
+  // on today's calendar.
   const meetings = await searchAll("meetings", {
     filterGroups: [
       {
         filters: [
           { propertyName: "hubspot_owner_id", operator: "IN", values: ownerIds },
-          { propertyName: "hs_meeting_start_time", operator: "BETWEEN", value: start, highValue: end },
+          { propertyName: "hs_createdate", operator: "BETWEEN", value: start, highValue: end },
         ],
       },
     ],
