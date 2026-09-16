@@ -24,6 +24,9 @@ export default function Home() {
       >
         🎮 ENTRAR AL SCOREBOARD
       </Link>
+      <a href="https://claude.ai/artifact/HGqUakYuZWj2pUN1ibNTKR" target="_blank" rel="noopener" className="font-pixel text-[10px] tracking-widest text-cyan-300 underline underline-offset-4">
+              📖 VER LAS REGLAS COMPLETAS
+      </a>
     </main>
   );
 }
