@@ -71,7 +71,7 @@ export default function Home() {
           </span>
         </div>
 
-        <h1 className="text-center text-3xl sm:text-4xl font-bold text-white mt-6 mb-10">
+        <h1 className="text-center text-5xl sm:text-6xl font-bold uppercase tracking-wide text-white mt-6 mb-10">
           Mapon GameHub
         </h1>
 
