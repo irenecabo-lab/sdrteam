@@ -212,22 +212,35 @@ async function fetchMeetings(dealById: Map<string, any>, companyNameByDealId: Ma
   const meetingIds = meetings.map((m: any) => m.id);
   const dealAssoc = await batchReadAssociations("meetings", "deals", meetingIds);
 
-  return meetings.map((m: any): MeetingRecord => {
-    const dealIds = dealAssoc.get(m.id) ?? [];
-    const dealId = dealIds[0];
-    const deal = dealId ? dealById.get(dealId) : undefined;
-    return {
-      meetingId: m.id,
-      dealId: dealId ?? "",
-      dealName: deal?.properties?.dealname ?? "",
-      companyName: dealId ? companyNameByDealId.get(dealId) ?? "" : "",
-      ownerId: m.properties.hubspot_owner_id,
-      bookedAt: m.properties.hs_createdate,
-      meetingAt: m.properties.hs_meeting_start_time,
-      outcome: (m.properties.hs_meeting_outcome ?? "SCHEDULED") as MeetingRecord["outcome"],
-      fleetSize: deal?.properties?.fleet_size ? Number(deal.properties.fleet_size) : undefined,
-    };
-  });
+  // Only a meeting tied to an outbound, new-business deal (i.e. a deal that
+  // made it into `dealById`, which is already scoped by fetchDealsInScope's
+  // lead_master_source + company_master_type filters) counts toward
+  // "agendado"/meetings scoring and fleet/TOCHA captures. A meeting on an
+  // inbound lead or an existing-client account still has its calls counted
+  // elsewhere, but must not surface here - confirmed 16/9/26 after a manual
+  // dry run showed most same-day meetings were actually inbound or
+  // existing-client, not genuine outbound captures.
+  return meetings
+    .filter((m: any) => {
+      const dealIds: string[] = dealAssoc.get(m.id) ?? [];
+      return dealIds.some((id) => dealById.has(id));
+    })
+    .map((m: any): MeetingRecord => {
+      const dealIds: string[] = dealAssoc.get(m.id) ?? [];
+      const dealId = dealIds.find((id) => dealById.has(id))!;
+      const deal = dealById.get(dealId);
+      return {
+        meetingId: m.id,
+        dealId,
+        dealName: deal?.properties?.dealname ?? "",
+        companyName: companyNameByDealId.get(dealId) ?? "",
+        ownerId: m.properties.hubspot_owner_id,
+        bookedAt: m.properties.hs_createdate,
+        meetingAt: m.properties.hs_meeting_start_time,
+        outcome: (m.properties.hs_meeting_outcome ?? "SCHEDULED") as MeetingRecord["outcome"],
+        fleetSize: deal?.properties?.fleet_size ? Number(deal.properties.fleet_size) : undefined,
+      };
+    });
 }
 
 export class HubSpotProvider implements DataProvider {
