@@ -71,10 +71,14 @@ export default function Home() {
           </span>
         </div>
 
+        <h1 className="text-center text-3xl sm:text-4xl font-bold text-white mt-6 mb-10">
+          Mapon GameHub
+        </h1>
+
         {/* Main entrance: the active game(s), centered like a hall's front door.
            Each keeps its own arcade identity (cyan neon, burst rays) rather
            than matching the hall's lime/slate shell - it's its own game. */}
-        <div className="flex flex-wrap justify-center gap-5 mt-6 mb-12">
+        <div className="flex flex-wrap justify-center gap-5 mb-12">
           {activeGames.map((game) => (
             <a
               key={game.id}
