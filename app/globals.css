@@ -1,0 +1,121 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Press+Start+2P&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap");
+
+:root {
+  --ink: #070b16;
+  --panel: #0e1526;
+  --panel-2: #131c33;
+  --line: #223055;
+  --cyan: #2be3ff;
+  --cyan-dim: #0c3a47;
+  --gold: #ffcb47;
+  --mute: #8492c4;
+  --team-a: #2be3ff;
+  --team-b: #ff3d7f;
+}
+
+html,
+body {
+  background: var(--ink);
+  color: #eef2ff;
+}
+
+body {
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  background:
+    radial-gradient(ellipse 1100px 560px at 50% -12%, #0f2f45 0%, transparent 60%),
+    radial-gradient(ellipse 700px 420px at 92% 18%, rgba(255, 61, 127, 0.06) 0%, transparent 60%),
+    var(--ink);
+  background-attachment: fixed;
+}
+
+/* Shared "game panel" accent: a thin glowing strip along the top edge of a
+   card, matching the rules-landing page's card style. Default cyan; pass an
+   inline --panel-accent custom property to tint it per team. */
+.game-panel {
+  position: relative;
+}
+.game-panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  height: 2px;
+  border-radius: 2px;
+  opacity: 0.85;
+  background: linear-gradient(90deg, var(--panel-accent, #2be3ff), transparent 70%);
+}
+
+.dot-live {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  display: inline-block;
+  animation: dot-blink 1.4s ease-in-out infinite;
+}
+@keyframes dot-blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* Comic/manga "impact burst" panel background - radiating speed-lines behind
+   the panel content, faded out toward the edges with a radial mask, tinted
+   per panel via --burst-color. An original CSS pattern (not a copied image)
+   in the spirit of a manga action-panel flash. Kept low-opacity so text on
+   top stays fully readable on an office TV. */
+.burst-panel {
+  position: relative;
+  isolation: isolate;
+}
+.burst-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.32;
+  background:
+    /* sparkle stars, same technique as the rules-landing hero */
+    radial-gradient(2px 2px at 15% 25%, rgba(255, 255, 255, 0.9) 0, transparent 60%),
+    radial-gradient(1.5px 1.5px at 80% 15%, rgba(255, 255, 255, 0.7) 0, transparent 60%),
+    radial-gradient(2px 2px at 65% 70%, rgba(255, 255, 255, 0.8) 0, transparent 60%),
+    radial-gradient(1.5px 1.5px at 30% 75%, rgba(255, 255, 255, 0.6) 0, transparent 60%),
+    radial-gradient(1.5px 1.5px at 90% 55%, rgba(255, 255, 255, 0.7) 0, transparent 60%),
+    radial-gradient(1.5px 1.5px at 45% 12%, rgba(255, 255, 255, 0.6) 0, transparent 60%),
+    /* two layered ray fans for an organic thick+thin neon-burst look */
+    repeating-conic-gradient(
+      from 6deg at 50% 42%,
+      var(--burst-color, #2be3ff) 0deg 1deg,
+      transparent 1deg 17deg
+    ),
+    repeating-conic-gradient(
+      from 0deg at 50% 42%,
+      var(--burst-color-2, #ff3d7f) 0deg 2.4deg,
+      transparent 2.4deg 21deg
+    ),
+    /* glow core */
+    radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--burst-color, #2be3ff) 55%, transparent) 0%, transparent 55%);
+  -webkit-mask-image: radial-gradient(circle at 50% 42%, black 0%, black 12%, transparent 75%);
+  mask-image: radial-gradient(circle at 50% 42%, black 0%, black 12%, transparent 75%);
+  pointer-events: none;
+}
+.burst-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.font-display {
+  font-family: "Luckiest Guy", "IBM Plex Sans", system-ui, sans-serif;
+}
+.font-pixel {
+  font-family: "Press Start 2P", monospace;
+}
+.font-mono-stat {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}

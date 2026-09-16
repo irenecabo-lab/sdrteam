@@ -1,0 +1,63 @@
+{
+  "_comment": "Example fixture for DATA_SOURCE=manual. Copy this file to competition-data.json and edit through /admin (or by hand) once the competition starts. Owner IDs match config/owners.config.ts. All numbers below are made-up examples for two sample days, not real activity.",
+  "dailyActivity": [
+    { "ownerId": "44080801", "date": "2026-09-22", "calls": 58, "talkTimeMinutes": 84, "qualityCalls": 11 },
+    { "ownerId": "33763722", "date": "2026-09-22", "calls": 63, "talkTimeMinutes": 97, "qualityCalls": 14 },
+    { "ownerId": "30080243", "date": "2026-09-22", "calls": 21, "talkTimeMinutes": 40, "qualityCalls": 5 },
+    { "ownerId": "78282993", "date": "2026-09-22", "calls": 55, "talkTimeMinutes": 88, "qualityCalls": 9 },
+    { "ownerId": "30080242", "date": "2026-09-22", "calls": 61, "talkTimeMinutes": 95, "qualityCalls": 13 },
+
+    { "ownerId": "44080801", "date": "2026-09-23", "calls": 49, "talkTimeMinutes": 70, "qualityCalls": 8 },
+    { "ownerId": "33763722", "date": "2026-09-23", "calls": 66, "talkTimeMinutes": 101, "qualityCalls": 16 },
+    { "ownerId": "30080243", "date": "2026-09-23", "calls": 19, "talkTimeMinutes": 33, "qualityCalls": 4 },
+    { "ownerId": "78282993", "date": "2026-09-23", "calls": 60, "talkTimeMinutes": 90, "qualityCalls": 12 },
+    { "ownerId": "30080242", "date": "2026-09-23", "calls": 57, "talkTimeMinutes": 86, "qualityCalls": 10 }
+  ],
+  "dealStageEvents": [
+    { "dealId": "example-1", "dealName": "Transportes Ejemplo SL - New Deal", "companyName": "Transportes Ejemplo SL", "ownerId": "33763722", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T09:14:00+02:00" },
+    { "dealId": "example-1", "dealName": "Transportes Ejemplo SL - New Deal", "companyName": "Transportes Ejemplo SL", "ownerId": "33763722", "fromStageId": "1452704954", "toStageId": "1452704955", "timestamp": "2026-09-23T11:02:00+02:00" },
+    { "dealId": "example-2", "dealName": "Logística Muestra SA - New Deal", "companyName": "Logística Muestra SA", "ownerId": "30080242", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T10:30:00+02:00" }
+  ],
+  "meetings": [
+    {
+      "meetingId": "meet-example-1",
+      "dealId": "example-3",
+      "dealName": "Construcciones Muestra SL - New Deal",
+      "companyName": "Construcciones Muestra SL",
+      "ownerId": "44080801",
+      "bookedAt": "2026-09-22T12:00:00+02:00",
+      "meetingAt": "2026-09-24T10:00:00+02:00",
+      "outcome": "SCHEDULED",
+      "fleetSize": 84
+    },
+    {
+      "meetingId": "meet-example-2",
+      "dealId": "example-4",
+      "dealName": "Reciclajes Muestra SL - New Deal",
+      "companyName": "Reciclajes Muestra SL",
+      "ownerId": "30080242",
+      "bookedAt": "2026-09-23T09:20:00+02:00",
+      "meetingAt": "2026-09-23T16:00:00+02:00",
+      "outcome": "COMPLETED",
+      "fleetSize": 132
+    }
+  ],
+  "pipelineDeals": [
+    {
+      "dealId": "example-3",
+      "dealName": "Construcciones Muestra SL - New Deal",
+      "companyName": "Construcciones Muestra SL",
+      "ownerId": "44080801",
+      "amountEur": 4200,
+      "createdAt": "2026-09-22T12:00:00+02:00"
+    },
+    {
+      "dealId": "example-4",
+      "dealName": "Reciclajes Muestra SL - New Deal",
+      "companyName": "Reciclajes Muestra SL",
+      "ownerId": "30080242",
+      "amountEur": 6800,
+      "createdAt": "2026-09-23T09:20:00+02:00"
+    }
+  ]
+}
