@@ -1,5 +1,5 @@
 {
-  "_comment": "PRUEBA REAL TEMPORAL (16-18 sept 2026, ventana movida en scoring.config.ts) - datos reales sacados de HubSpot via MCP para validar el pipeline antes del lanzamiento real del 22. CORREGIDO 16/9/26 tarde: se filtraron meetings y deals para quedarnos solo con los realmente outbound + new-business (lead_master_source=false y company_master_type != Existing client), igual que hace fetchDealsInScope()/fetchMeetings() en el codigo real. La primera pasada incluia por error reuniones y deals inbound o de cliente existente. Se resetea el viernes 18/9 y la ventana vuelve a 22-30/9.",
+  "_comment": "PRUEBA REAL TEMPORAL (16-18 sept 2026, ventana movida en scoring.config.ts) - datos reales sacados de HubSpot via MCP para validar el pipeline antes del lanzamiento real del 22. CORREGIDO 16/9/26 tarde (2a vuelta): el scoring filtra meetings por bookedAt (hs_createdate), no por la fecha de la reunion - se recogieron las reuniones AGENDADAS hoy (16/9) por los 5 owners y se filtraron a las que son realmente outbound + new-business (lead_master_source=false y company_master_type != Existing client). Se resetea el viernes 18/9 y la ventana vuelve a 22-30/9.",
   "dailyActivity": [
     { "ownerId": "44080801", "date": "2026-09-16", "calls": 24, "talkTimeMinutes": 32, "qualityCalls": 3 },
     { "ownerId": "33763722", "date": "2026-09-16", "calls": 45, "talkTimeMinutes": 38, "qualityCalls": 2 },
@@ -9,10 +9,8 @@
   ],
   "dealStageEvents": [],
   "meetings": [
-    { "meetingId": "519953594579", "dealId": "499024537796", "dealName": "RAESGRA, S.L. - New Deal", "companyName": "", "ownerId": "30080242", "bookedAt": "2026-09-16T08:32:43.029Z", "meetingAt": "2026-09-16T08:32:23.732Z", "outcome": "COMPLETED", "fleetSize": 60 },
-    { "meetingId": "518372186350", "dealId": "443984852191", "dealName": "Virtón - New Deal", "companyName": "", "ownerId": "30080242", "bookedAt": "2026-09-09T13:08:19.112Z", "meetingAt": "2026-09-17T14:00:00Z", "outcome": "SCHEDULED", "fleetSize": 72 },
-    { "meetingId": "514846912747", "dealId": "443581005047", "dealName": "Grupo Elsamex - New Deal", "companyName": "", "ownerId": "30080242", "bookedAt": "2026-08-27T12:27:15.159Z", "meetingAt": "2026-09-18T08:00:00Z", "outcome": "SCHEDULED", "fleetSize": 10 },
-    { "meetingId": "503556285652", "dealId": "499043178720", "dealName": "TAXUS MEDIO AMBIENTE - New Deal", "companyName": "", "ownerId": "33763722", "bookedAt": "2026-07-15T09:23:53.275Z", "meetingAt": "2026-09-16T09:00:00Z", "outcome": "COMPLETED", "fleetSize": 30 }
+    { "meetingId": "520046287069", "dealId": "507745889468", "dealName": "Datacol Hispania - New Deal", "companyName": "", "ownerId": "33763722", "bookedAt": "2026-09-16T11:15:07.821Z", "meetingAt": "2026-09-22T09:00:00Z", "outcome": "CANCELED", "fleetSize": 200 },
+    { "meetingId": "519953594579", "dealId": "499024537796", "dealName": "RAESGRA, S.L. - New Deal", "companyName": "", "ownerId": "30080242", "bookedAt": "2026-09-16T08:32:43.029Z", "meetingAt": "2026-09-16T08:32:23.732Z", "outcome": "COMPLETED", "fleetSize": 60 }
   ],
   "pipelineDeals": []
 }
