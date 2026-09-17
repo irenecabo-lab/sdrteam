@@ -162,42 +162,70 @@ const DEAL_PROPERTIES = [
  * the pipe) OR whose CURRENT stage was entered during the window (an
  * existing/backlog deal that got worked and moved forward this week).
  *
- * Fixed 17/9/26: this used to be a single query requiring hs_createdate
- * BETWEEN the window, which only matched brand-new deals. Confirmed with a
- * real dry-run that day that Lidia (and presumably others) routinely work
- * OLD backlog deals (created months earlier) and bulk-move them through
- * "Attempting to contact" / "Conversation happening" etc. - genuine outbound
- * effort, not an edge case. Under the old query those deals never showed up
- * in dealById, so fetchMeetings() silently dropped any meeting booked
- * against them and fetchStageTransitionEvents() never even saw their stage
- * history - meaning most real stage-transition and meeting scoring during
- * the actual 22-30/9 competition would have been missed, since most outbound
- * work targets the existing backlog rather than freshly-created deals.
+ * Fixed 17/9/26 (1st pass): this used to be a single query requiring
+ * hs_createdate BETWEEN the window, which only matched brand-new deals.
+ * Confirmed with a real dry-run that day that Lidia (and presumably others)
+ * routinely work OLD backlog deals (created months earlier) and bulk-move
+ * them through "Attempting to contact" / "Conversation happening" etc. -
+ * genuine outbound effort, not an edge case.
+ *
+ * Fixed 17/9/26 (2nd pass, same day): Marti reported a meeting she'd booked
+ * wasn't showing up. Traced it to something much bigger than the first fix -
+ * HubSpot auto-reassigns a deal from the SDR to an Account Executive the
+ * moment it enters "Meeting scheduled" (confirmed: sampled every deal
+ * currently sitting in that stage in the Spain pipeline, 12/12 were owned by
+ * one of the two AEs, 0/12 by any of the 5 competition SDRs; Marti's own
+ * "Virtón" and the earlier "Datacol Hispania" meeting both show the same
+ * pattern, reassigned within minutes of the meeting being booked). The old
+ * "owner IN ownerIds" filter on this second arm made that exact moment - the
+ * deal crossing into Meeting scheduled - the same moment it fell out of
+ * scope, so the single most valuable transition ("Meeting agendada", +10)
+ * was structurally undetectable, and any meeting tied to that deal was
+ * silently dropped by fetchMeetings(). This would have zeroed out real
+ * meeting scoring for the whole 22-30/9 competition, not just an edge case.
+ * Fix: drop the owner filter from this second arm entirely (pipeline +
+ * outbound + new-business eligibility still apply) so a deal stays in scope
+ * across the SDR-to-AE handoff. fetchStageTransitionEvents() below no longer
+ * trusts the deal's CURRENT owner for attribution - it reads owner property
+ * history and credits whoever actually owned the deal at the moment of each
+ * transition, so broadening this arm doesn't mis-credit an AE.
  */
 async function fetchDealsRelevantToWindow(): Promise<any[]> {
   const { start, end } = windowFilters();
-  const base: any[] = [
-    { propertyName: "hubspot_owner_id", operator: "IN", values: ownerIds },
-    { propertyName: "pipeline", operator: "EQ", value: SPAIN_PIPELINE_ID },
-  ];
+  const eligibility: any[] = [{ propertyName: "pipeline", operator: "EQ", value: SPAIN_PIPELINE_ID }];
   if (OUTBOUND_FILTER_PROPERTY) {
-    base.push({ propertyName: OUTBOUND_FILTER_PROPERTY.property, operator: "EQ", value: OUTBOUND_FILTER_PROPERTY.outboundValue });
+    eligibility.push({ propertyName: OUTBOUND_FILTER_PROPERTY.property, operator: "EQ", value: OUTBOUND_FILTER_PROPERTY.outboundValue });
   }
   // Matches the team's own live "Outbound" HubSpot reports: excludes deals
   // on existing-client accounts (upsell/cross-sell), keeping only new-business.
-  base.push({ propertyName: NEW_BUSINESS_FILTER_PROPERTY.property, operator: "NEQ", value: NEW_BUSINESS_FILTER_PROPERTY.excludeValue });
+  eligibility.push({ propertyName: NEW_BUSINESS_FILTER_PROPERTY.property, operator: "NEQ", value: NEW_BUSINESS_FILTER_PROPERTY.excludeValue });
+
+  const ownerFilter = { propertyName: "hubspot_owner_id", operator: "IN", values: ownerIds };
 
   return searchAll("deals", {
     filterGroups: [
-      { filters: [...base, { propertyName: "hs_createdate", operator: "BETWEEN", value: start, highValue: end }] },
-      { filters: [...base, { propertyName: "hs_v2_date_entered_current_stage", operator: "BETWEEN", value: start, highValue: end }] },
+      // Arm 1: brand-new deal created in-window. Still SDR-owned at the
+      // moment of creation (the AE handoff only happens later, at Meeting
+      // scheduled), so keeping the owner filter here is safe and keeps this
+      // arm narrow.
+      { filters: [...eligibility, ownerFilter, { propertyName: "hs_createdate", operator: "BETWEEN", value: start, highValue: end }] },
+      // Arm 2: existing/backlog deal that changed stage in-window. NO owner
+      // filter - see comment above.
+      { filters: [...eligibility, { propertyName: "hs_v2_date_entered_current_stage", operator: "BETWEEN", value: start, highValue: end }] },
     ],
     properties: DEAL_PROPERTIES,
   });
 }
 
 async function fetchStageTransitionEvents(dealIds: string[]): Promise<DealStageEvent[]> {
-  const withHistory = await batchReadWithHistory("deals", dealIds, ["dealstage"]);
+  // hubspot_owner_id is fetched WITH history alongside dealstage - see
+  // fetchDealsRelevantToWindow()'s comment: a deal can move from SDR to AE
+  // ownership partway through the window (routinely, right at Meeting
+  // scheduled), so the deal's CURRENT owner is often no longer the SDR who
+  // actually made a given transition happen. Each event below is credited to
+  // whoever owned the deal AT THE MOMENT of that specific transition, not to
+  // today's owner.
+  const withHistory = await batchReadWithHistory("deals", dealIds, ["dealstage", "hubspot_owner_id"]);
   const validPairs = new Set(STAGE_TRANSITION_POINTS.map((p) => `${p.from}>${p.to}`));
   const { start, end } = windowFilters();
   const startMs = new Date(start).getTime();
@@ -206,6 +234,9 @@ async function fetchStageTransitionEvents(dealIds: string[]): Promise<DealStageE
   const events: DealStageEvent[] = [];
   for (const d of withHistory) {
     const history = d.propertiesWithHistory?.dealstage ?? [];
+    const ownerHistory = [...(d.propertiesWithHistory?.hubspot_owner_id ?? [])].sort(
+      (a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    );
     // HubSpot returns history newest-first; sort oldest-first to walk transitions in order.
     const sorted = [...history].sort((a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
     for (let i = 1; i < sorted.length; i++) {
@@ -214,11 +245,24 @@ async function fetchStageTransitionEvents(dealIds: string[]): Promise<DealStageE
       const ts = new Date(sorted[i].timestamp).getTime();
       if (!validPairs.has(`${from}>${to}`)) continue;
       if (ts < startMs || ts > endMs) continue;
+
+      // Owner active at ts: the most recent owner-history entry at or before
+      // this transition's timestamp; if every owner-history entry is somehow
+      // after ts, fall back to the earliest known owner; if there's no owner
+      // history at all, fall back to the deal's current owner.
+      let ownerId = d.properties?.hubspot_owner_id ?? "";
+      const priorOwnerEntries = ownerHistory.filter((o: any) => new Date(o.timestamp).getTime() <= ts);
+      if (priorOwnerEntries.length > 0) {
+        ownerId = priorOwnerEntries[priorOwnerEntries.length - 1].value;
+      } else if (ownerHistory.length > 0) {
+        ownerId = ownerHistory[0].value;
+      }
+
       events.push({
         dealId: d.id,
         dealName: d.properties?.dealname ?? "",
         companyName: "", // filled in by caller once company associations are resolved
-        ownerId: d.properties?.hubspot_owner_id ?? "",
+        ownerId,
         fromStageId: from,
         toStageId: to,
         timestamp: sorted[i].timestamp,
@@ -257,13 +301,17 @@ async function fetchMeetings(dealById: Map<string, any>, companyNameByDealId: Ma
   const dealAssoc = await batchReadAssociations("meetings", "deals", meetingIds);
 
   // Only a meeting tied to an outbound, new-business deal (i.e. a deal that
-  // made it into `dealById`, which is already scoped by fetchDealsInScope's
+  // made it into `dealById`, which is scoped by fetchDealsRelevantToWindow's
   // lead_master_source + company_master_type filters) counts toward
   // "agendado"/meetings scoring and fleet/TOCHA captures. A meeting on an
   // inbound lead or an existing-client account still has its calls counted
   // elsewhere, but must not surface here - confirmed 16/9/26 after a manual
   // dry run showed most same-day meetings were actually inbound or
-  // existing-client, not genuine outbound captures.
+  // existing-client, not genuine outbound captures. Relies on
+  // fetchDealsRelevantToWindow()'s arm 2 carrying NO owner filter (fixed
+  // 17/9/26) so a deal that already got reassigned to an AE at Meeting
+  // scheduled is still in `dealById` - otherwise every real meeting would be
+  // silently dropped right here, regardless of the query above finding it.
   return meetings
     .filter((m: any) => {
       const dealIds: string[] = dealAssoc.get(m.id) ?? [];
