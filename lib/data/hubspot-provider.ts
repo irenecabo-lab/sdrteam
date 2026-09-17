@@ -1,6 +1,6 @@
 import type { CompetitionSnapshot, DailyActivity, DealStageEvent, MeetingRecord, PipelineDeal, DataProvider } from "@/lib/types";
 import { OWNERS } from "@/config/owners.config";
-import { SPAIN_PIPELINE_ID } from "./hubspot-stage-ids";
+import { SPAIN_PIPELINE_ID, STAGE_TRANSITION_STAGE_IDS } from "./hubspot-stage-ids";
 import { COMPETITION, QUALITY_CALL_MIN_SECONDS, STAGE_TRANSITION_POINTS } from "@/config/scoring.config";
 import { OUTBOUND_FILTER_PROPERTY, NEW_BUSINESS_FILTER_PROPERTY } from "@/config/hubspot-stages.config";
 
@@ -272,61 +272,75 @@ async function fetchStageTransitionEvents(dealIds: string[]): Promise<DealStageE
   return events;
 }
 
-async function fetchMeetings(dealById: Map<string, any>, companyNameByDealId: Map<string, string>): Promise<MeetingRecord[]> {
+async function fetchMeetings(
+  dealById: Map<string, any>,
+  dealOwnerAtMeetingScheduled: Map<string, string>,
+  companyNameByDealId: Map<string, string>
+): Promise<MeetingRecord[]> {
   const { start, end } = windowFilters();
+  const startMs = new Date(start).getTime();
+  const endMs = new Date(end).getTime();
+
+  // Fixed 17/9/26 (3rd pass, same day): this used to search MEETINGS by
+  // "owner IN ownerIds" first, then check whether the associated deal was
+  // eligible. Marti's own "Skytex" meeting - booked by her today - broke
+  // that: the meeting object itself came back owned by the Account
+  // Executive (254777055), not her, even though the deal's own
+  // Meeting-scheduled transition (per fetchStageTransitionEvents' owner
+  // history) is clearly attributable to her. So the SDR-to-AE handoff
+  // doesn't only move the DEAL's owner (fixed in the 2nd pass) - sometimes
+  // the MEETING object itself gets created directly under the AE (e.g. when
+  // it's booked through their calendar link). Searching meetings by SDR
+  // owner missed this one entirely, same failure mode one level down.
+  // Fix: stop trusting any owner field on the meeting search itself. Start
+  // from the eligible deals (already broadened in fetchDealsRelevantToWindow
+  // to survive the handoff) and pull their associated meetings directly, so
+  // discovery no longer depends on who HubSpot happened to stamp as the
+  // meeting's owner.
+  const dealIds = Array.from(dealById.keys());
+  const dealMeetingAssoc = await batchReadAssociations("deals", "meetings", dealIds);
+  const meetingIdToDealId = new Map<string, string>();
+  for (const [dealId, meetingIds] of dealMeetingAssoc.entries()) {
+    for (const meetingId of meetingIds) {
+      if (!meetingIdToDealId.has(meetingId)) meetingIdToDealId.set(meetingId, dealId);
+    }
+  }
+  const allMeetingIds = Array.from(meetingIdToDealId.keys());
+  const meetings = await batchRead("meetings", allMeetingIds, [
+    "hubspot_owner_id",
+    "hs_createdate",
+    "hs_meeting_start_time",
+    "hs_meeting_outcome",
+  ]);
+
   // Filtered by hs_createdate (when the meeting was BOOKED), not
   // hs_meeting_start_time (when it's scheduled to happen). Confirmed
   // 16/9/26: lib/scoring/{aggregate,bonuses}.ts gate every meeting-derived
   // score (agendadas, meetingsHeld, fleet/TOCHA captures, quick capture) on
   // isWithinCompetitionWindow(bookedAt) - a meeting booked today for a date
   // weeks out still counts as today's outbound activity, while a meeting
-  // booked weeks ago that merely happens to occur today does not. Filtering
-  // the HubSpot query itself by meeting start time (as this used to) pulled
-  // the wrong set entirely - it missed meetings booked in-window but
-  // scheduled for later, and pulled old meetings just because they landed
-  // on today's calendar.
-  const meetings = await searchAll("meetings", {
-    filterGroups: [
-      {
-        filters: [
-          { propertyName: "hubspot_owner_id", operator: "IN", values: ownerIds },
-          { propertyName: "hs_createdate", operator: "BETWEEN", value: start, highValue: end },
-        ],
-      },
-    ],
-    properties: ["hubspot_owner_id", "hs_createdate", "hs_meeting_start_time", "hs_meeting_outcome"],
-  });
-
-  const meetingIds = meetings.map((m: any) => m.id);
-  const dealAssoc = await batchReadAssociations("meetings", "deals", meetingIds);
-
-  // Only a meeting tied to an outbound, new-business deal (i.e. a deal that
-  // made it into `dealById`, which is scoped by fetchDealsRelevantToWindow's
-  // lead_master_source + company_master_type filters) counts toward
-  // "agendado"/meetings scoring and fleet/TOCHA captures. A meeting on an
-  // inbound lead or an existing-client account still has its calls counted
-  // elsewhere, but must not surface here - confirmed 16/9/26 after a manual
-  // dry run showed most same-day meetings were actually inbound or
-  // existing-client, not genuine outbound captures. Relies on
-  // fetchDealsRelevantToWindow()'s arm 2 carrying NO owner filter (fixed
-  // 17/9/26) so a deal that already got reassigned to an AE at Meeting
-  // scheduled is still in `dealById` - otherwise every real meeting would be
-  // silently dropped right here, regardless of the query above finding it.
+  // booked weeks ago that merely happens to occur today does not (confirmed
+  // again 17/9/26 against Marti's own "Skytex" and "Virtón" examples).
   return meetings
     .filter((m: any) => {
-      const dealIds: string[] = dealAssoc.get(m.id) ?? [];
-      return dealIds.some((id) => dealById.has(id));
+      const bookedMs = new Date(m.properties?.hs_createdate ?? 0).getTime();
+      return bookedMs >= startMs && bookedMs <= endMs;
     })
     .map((m: any): MeetingRecord => {
-      const dealIds: string[] = dealAssoc.get(m.id) ?? [];
-      const dealId = dealIds.find((id) => dealById.has(id))!;
+      const dealId = meetingIdToDealId.get(m.id)!;
       const deal = dealById.get(dealId);
+      // Credit whoever owned the deal AT THE MOMENT it entered Meeting
+      // scheduled (from fetchStageTransitionEvents' owner-history walk) -
+      // never the meeting's own owner field or the deal's current owner,
+      // neither of which reliably points at the SDR who actually booked it.
+      const ownerId =
+        dealOwnerAtMeetingScheduled.get(dealId) ?? m.properties.hubspot_owner_id ?? deal?.properties?.hubspot_owner_id ?? "";
       return {
         meetingId: m.id,
         dealId,
         dealName: deal?.properties?.dealname ?? "",
         companyName: companyNameByDealId.get(dealId) ?? "",
-        ownerId: m.properties.hubspot_owner_id,
+        ownerId,
         bookedAt: m.properties.hs_createdate,
         meetingAt: m.properties.hs_meeting_start_time,
         outcome: (m.properties.hs_meeting_outcome ?? "SCHEDULED") as MeetingRecord["outcome"],
@@ -350,13 +364,25 @@ export class HubSpotProvider implements DataProvider {
       companyNameByDealId.set(dealId, companyNameById.get(compIds[0]) ?? "");
     }
 
-    const [dailyActivity, stageEventsRaw, meetings] = await Promise.all([
+    // fetchMeetings needs the owner-history result of fetchStageTransitionEvents
+    // (to attribute a meeting to whoever owned its deal at Meeting scheduled,
+    // not to the meeting's own unreliable owner field - see fetchMeetings'
+    // comment), so it can no longer run in the same Promise.all as that call.
+    const [dailyActivity, stageEventsRaw] = await Promise.all([
       fetchCallsAsDailyActivity(),
       fetchStageTransitionEvents(dealIds),
-      fetchMeetings(dealById, companyNameByDealId),
     ]);
 
     const dealStageEvents = stageEventsRaw.map((e) => ({ ...e, companyName: companyNameByDealId.get(e.dealId) ?? "" }));
+
+    const dealOwnerAtMeetingScheduled = new Map<string, string>();
+    for (const e of dealStageEvents) {
+      if (e.toStageId === STAGE_TRANSITION_STAGE_IDS.MEETING_SCHEDULED) {
+        dealOwnerAtMeetingScheduled.set(e.dealId, e.ownerId);
+      }
+    }
+
+    const meetings = await fetchMeetings(dealById, dealOwnerAtMeetingScheduled, companyNameByDealId);
 
     // "New company entered the outbound pipe" only makes sense for deals
     // actually CREATED during the window - unlike dealById/dealIds above,
