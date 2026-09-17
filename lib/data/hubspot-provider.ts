@@ -144,22 +144,55 @@ async function fetchCallsAsDailyActivity(): Promise<DailyActivity[]> {
   return Array.from(byKey.values()).map((e) => ({ ...e, talkTimeMinutes: Math.round(e.talkTimeMinutes) }));
 }
 
-async function fetchDealsInScope(): Promise<any[]> {
+const DEAL_PROPERTIES = [
+  "dealname",
+  "amount_in_home_currency",
+  "fleet_size",
+  "hubspot_owner_id",
+  "dealstage",
+  "hs_createdate",
+  "company_master_type",
+  "lead_master_source",
+  "hs_v2_date_entered_current_stage",
+];
+
+/**
+ * The full set of outbound + new-business deals relevant to this
+ * competition window: either created during the window (new leads entering
+ * the pipe) OR whose CURRENT stage was entered during the window (an
+ * existing/backlog deal that got worked and moved forward this week).
+ *
+ * Fixed 17/9/26: this used to be a single query requiring hs_createdate
+ * BETWEEN the window, which only matched brand-new deals. Confirmed with a
+ * real dry-run that day that Lidia (and presumably others) routinely work
+ * OLD backlog deals (created months earlier) and bulk-move them through
+ * "Attempting to contact" / "Conversation happening" etc. - genuine outbound
+ * effort, not an edge case. Under the old query those deals never showed up
+ * in dealById, so fetchMeetings() silently dropped any meeting booked
+ * against them and fetchStageTransitionEvents() never even saw their stage
+ * history - meaning most real stage-transition and meeting scoring during
+ * the actual 22-30/9 competition would have been missed, since most outbound
+ * work targets the existing backlog rather than freshly-created deals.
+ */
+async function fetchDealsRelevantToWindow(): Promise<any[]> {
   const { start, end } = windowFilters();
-  const filters: any[] = [
+  const base: any[] = [
     { propertyName: "hubspot_owner_id", operator: "IN", values: ownerIds },
     { propertyName: "pipeline", operator: "EQ", value: SPAIN_PIPELINE_ID },
-    { propertyName: "hs_createdate", operator: "BETWEEN", value: start, highValue: end },
   ];
   if (OUTBOUND_FILTER_PROPERTY) {
-    filters.push({ propertyName: OUTBOUND_FILTER_PROPERTY.property, operator: "EQ", value: OUTBOUND_FILTER_PROPERTY.outboundValue });
+    base.push({ propertyName: OUTBOUND_FILTER_PROPERTY.property, operator: "EQ", value: OUTBOUND_FILTER_PROPERTY.outboundValue });
   }
   // Matches the team's own live "Outbound" HubSpot reports: excludes deals
   // on existing-client accounts (upsell/cross-sell), keeping only new-business.
-  filters.push({ propertyName: NEW_BUSINESS_FILTER_PROPERTY.property, operator: "NEQ", value: NEW_BUSINESS_FILTER_PROPERTY.excludeValue });
+  base.push({ propertyName: NEW_BUSINESS_FILTER_PROPERTY.property, operator: "NEQ", value: NEW_BUSINESS_FILTER_PROPERTY.excludeValue });
+
   return searchAll("deals", {
-    filterGroups: [{ filters }],
-    properties: ["dealname", "amount_in_home_currency", "fleet_size", "hubspot_owner_id", "dealstage", "hs_createdate", "company_master_type", "lead_master_source"],
+    filterGroups: [
+      { filters: [...base, { propertyName: "hs_createdate", operator: "BETWEEN", value: start, highValue: end }] },
+      { filters: [...base, { propertyName: "hs_v2_date_entered_current_stage", operator: "BETWEEN", value: start, highValue: end }] },
+    ],
+    properties: DEAL_PROPERTIES,
   });
 }
 
@@ -256,7 +289,7 @@ async function fetchMeetings(dealById: Map<string, any>, companyNameByDealId: Ma
 
 export class HubSpotProvider implements DataProvider {
   async getSnapshot(): Promise<CompetitionSnapshot> {
-    const deals = await fetchDealsInScope();
+    const deals = await fetchDealsRelevantToWindow();
     const dealById = new Map(deals.map((d: any) => [d.id, d]));
     const dealIds = deals.map((d: any) => d.id);
 
@@ -277,14 +310,26 @@ export class HubSpotProvider implements DataProvider {
 
     const dealStageEvents = stageEventsRaw.map((e) => ({ ...e, companyName: companyNameByDealId.get(e.dealId) ?? "" }));
 
-    const pipelineDeals: PipelineDeal[] = deals.map((d: any) => ({
-      dealId: d.id,
-      dealName: d.properties?.dealname ?? "",
-      companyName: companyNameByDealId.get(d.id) ?? "",
-      ownerId: d.properties?.hubspot_owner_id ?? "",
-      amountEur: Number(d.properties?.amount_in_home_currency ?? 0),
-      createdAt: d.properties?.hs_createdate ?? "",
-    }));
+    // "New company entered the outbound pipe" only makes sense for deals
+    // actually CREATED during the window - unlike dealById/dealIds above,
+    // this must stay narrow, or a backlog deal that merely moved stages this
+    // week would wrongly count as a brand-new pipeline addition.
+    const { start, end } = windowFilters();
+    const startMs = new Date(start).getTime();
+    const endMs = new Date(end).getTime();
+    const pipelineDeals: PipelineDeal[] = deals
+      .filter((d: any) => {
+        const createdMs = new Date(d.properties?.hs_createdate ?? 0).getTime();
+        return createdMs >= startMs && createdMs <= endMs;
+      })
+      .map((d: any) => ({
+        dealId: d.id,
+        dealName: d.properties?.dealname ?? "",
+        companyName: companyNameByDealId.get(d.id) ?? "",
+        ownerId: d.properties?.hubspot_owner_id ?? "",
+        amountEur: Number(d.properties?.amount_in_home_currency ?? 0),
+        createdAt: d.properties?.hs_createdate ?? "",
+      }));
 
     return {
       generatedAt: new Date().toISOString(),
