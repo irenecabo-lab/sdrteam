@@ -1,11 +1,16 @@
 {
-  "_comment": "PRUEBA REAL TEMPORAL (16-18 sept 2026, ventana movida en scoring.config.ts) - datos reales sacados de HubSpot via MCP para validar el pipeline antes del lanzamiento real del 22. CORREGIDO 16/9/26 tarde (2a vuelta): el scoring filtra meetings por bookedAt (hs_createdate), no por la fecha de la reunion - se recogieron las reuniones AGENDADAS hoy (16/9) por los 5 owners y se filtraron a las que son realmente outbound + new-business (lead_master_source=false y company_master_type != Existing client). Se resetea el viernes 18/9 y la ventana vuelve a 22-30/9.",
+  "_comment": "PRUEBA REAL TEMPORAL (16-18 sept 2026, ventana movida en scoring.config.ts) - datos reales sacados de HubSpot via MCP para validar el pipeline antes del lanzamiento real del 22. CORREGIDO 16/9/26 tarde (2a vuelta): el scoring filtra meetings por bookedAt (hs_createdate), no por la fecha de la reunion. ACTUALIZADO 17/9/26 con el segundo dia de la prueba: mismas llamadas reales via MCP; no hubo meetings ni deals nuevos outbound+new-business validos hoy (la unica meeting creada hoy era de un lead inbound, correctamente excluida). dealStageEvents queda vacio para hoy: se detectaron 5 deals de Lidia (backlog, creados en enero/marzo) que cambiaron de etapa hoy via bulk-move para nutrir el pipe (confirmado con ella, practica normal), pero verificar la etapa exacta de origen de cada transicion requiere el historial de propiedades que solo trae el token real de HubSpot (DATA_SOURCE=hubspot), no las herramientas MCP de solo lectura usadas en esta prueba manual - no se han inventado puntos sin esa verificacion. Se resetea el viernes 18/9 y la ventana vuelve a 22-30/9.",
   "dailyActivity": [
     { "ownerId": "44080801", "date": "2026-09-16", "calls": 24, "talkTimeMinutes": 32, "qualityCalls": 3 },
     { "ownerId": "33763722", "date": "2026-09-16", "calls": 45, "talkTimeMinutes": 38, "qualityCalls": 2 },
     { "ownerId": "30080243", "date": "2026-09-16", "calls": 2, "talkTimeMinutes": 1, "qualityCalls": 0 },
     { "ownerId": "78282993", "date": "2026-09-16", "calls": 41, "talkTimeMinutes": 23, "qualityCalls": 1 },
-    { "ownerId": "30080242", "date": "2026-09-16", "calls": 56, "talkTimeMinutes": 42, "qualityCalls": 4 }
+    { "ownerId": "30080242", "date": "2026-09-16", "calls": 56, "talkTimeMinutes": 42, "qualityCalls": 4 },
+    { "ownerId": "44080801", "date": "2026-09-17", "calls": 20, "talkTimeMinutes": 28, "qualityCalls": 2 },
+    { "ownerId": "33763722", "date": "2026-09-17", "calls": 38, "talkTimeMinutes": 39, "qualityCalls": 2 },
+    { "ownerId": "30080243", "date": "2026-09-17", "calls": 3, "talkTimeMinutes": 1, "qualityCalls": 0 },
+    { "ownerId": "78282993", "date": "2026-09-17", "calls": 25, "talkTimeMinutes": 19, "qualityCalls": 2 },
+    { "ownerId": "30080242", "date": "2026-09-17", "calls": 27, "talkTimeMinutes": 16, "qualityCalls": 2 }
   ],
   "dealStageEvents": [],
   "meetings": [
