@@ -1,13 +1,13 @@
 // Every number that drives the game's math lives here. Change values, not
 // the engine in lib/scoring/*.ts.
 
-// TEST TEMPORAL (16-18 sept): ventana movida a hoy-viernes para validar el
-// pipeline con datos reales antes del lanzamiento. Revertir a 2026-09-22 /
-// 2026-09-30 el viernes 18/9, junto con el reseteo de data/competition-data.json.
+// Ventana real de la competición. Revertida el 20/9/26 tras la prueba con
+// datos reales del 16-18/9 (ventana temporal ya retirada junto con el
+// reseteo de data/competition-data.json).
 export const COMPETITION = {
   name: "MAPON OUTBOUND BATTLE",
-  startDate: "2026-09-16", // inclusive, Europe/Madrid calendar day
-  endDate: "2026-09-18", // inclusive, Europe/Madrid calendar day
+  startDate: "2026-09-22", // inclusive, Europe/Madrid calendar day
+  endDate: "2026-09-30", // inclusive, Europe/Madrid calendar day
   timezone: "Europe/Madrid",
 };
 
