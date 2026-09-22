@@ -1,7 +1,28 @@
 {
-  "_comment": "Reseteado el 20/9/26 tras terminar la prueba con datos reales del 16-18/9. La ventana real (22/9-30/9) empieza vacía en el martes. NOTA sobre Skytex: se evaluó como posible ejemplo real (deal 505602962624) pero se descartó a proposito - HubSpot lo marca lead_master_source=Inbound y mapon_original_traffic_source/unified_leads_source=Paid Social, o sea que no es un lead de prospección outbound aunque Marti agendara la reunión, así que no debe puntuar y no se incluye aquí. El fix de atribución por historial de owner (fetchStageTransitionEvents/fetchMeetings en lib/data/hubspot-provider.ts) sigue vigente en produccion para cuando DATA_SOURCE=hubspot este activo.",
-  "dailyActivity": [],
-  "dealStageEvents": [],
-  "meetings": [],
+  "_comment": "Día 1 (22/9/26) de la ventana real. Verificado vía HubSpot MCP y confirmado por Marti. NOTA sobre el Meeting Scheduled de Derivats Hivernacle (deal 508105253088): el owner actual en HubSpot es Joel (44080801), pero Marti confirmó que la reunión la agendó Lidia (33763722) - hubo un traspaso posterior que no es visible por MCP (sin acceso a propertiesWithHistory), así que aquí el ownerId sigue el criterio de Marti, no el campo owner del deal. También confirmado por Marti: el deal es outbound pese a que unified_leads_source dice 'CALL (INCOMING, COLD)' (contradice lead_master_source=false). Excluido de este volcado: deal 'Kanguro Exprésjmartin new lead' (509989934312) por ser inbound (lead_master_source=true) y no pertenecer al pipeline España.",
+  "dailyActivity": [
+    { "ownerId": "30080242", "date": "2026-09-22", "calls": 41, "talkTimeMinutes": 46.2, "qualityCalls": 4 },
+    { "ownerId": "33763722", "date": "2026-09-22", "calls": 37, "talkTimeMinutes": 44.5, "qualityCalls": 5 },
+    { "ownerId": "78282993", "date": "2026-09-22", "calls": 28, "talkTimeMinutes": 26.6, "qualityCalls": 2 },
+    { "ownerId": "44080801", "date": "2026-09-22", "calls": 16, "talkTimeMinutes": 16.0, "qualityCalls": 2 },
+    { "ownerId": "30080243", "date": "2026-09-22", "calls": 3, "talkTimeMinutes": 23.6, "qualityCalls": 2 }
+  ],
+  "dealStageEvents": [
+    { "dealId": "508132341960", "dealName": "Jardín Móvil - New Deal", "companyName": "Jardín Móvil", "ownerId": "30080242", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T09:35:59.260Z" },
+    { "dealId": "508085640399", "dealName": "Indutech Solutions - New Deal", "companyName": "Indutech Solutions", "ownerId": "30080242", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T09:35:58.733Z" },
+    { "dealId": "508141380801", "dealName": "Tendre i Florit - New Deal", "companyName": "Tendre i Florit", "ownerId": "30080242", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T09:35:59.601Z" },
+    { "dealId": "508105253092", "dealName": "ISMOLD - New Deal", "companyName": "ISMOLD", "ownerId": "30080242", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T09:36:00.196Z" },
+    { "dealId": "508146629862", "dealName": "Jardinista | Aquatic Luxury Gardens - New Deal", "companyName": "Jardinista | Aquatic Luxury Gardens", "ownerId": "30080242", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T09:35:59.421Z" },
+    { "dealId": "508119752909", "dealName": "Phisterra - New Deal", "companyName": "Phisterra", "ownerId": "30080242", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T09:35:59.755Z" },
+    { "dealId": "508105253089", "dealName": "Greendel SL - New Deal", "companyName": "Greendel SL", "ownerId": "30080242", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T09:36:00.013Z" },
+    { "dealId": "508117966029", "dealName": "NIS Motion® - New Deal", "companyName": "NIS Motion®", "ownerId": "30080242", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T09:35:59.891Z" },
+    { "dealId": "508085640398", "dealName": "Jardines Olivina SL - New Deal", "companyName": "Jardines Olivina SL", "ownerId": "30080242", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T09:35:59.105Z" },
+    { "dealId": "508178005196", "dealName": "Lluis Jardins Madremanya - New Deal", "companyName": "Lluis Jardins Madremanya", "ownerId": "30080242", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T09:35:58.932Z" },
+    { "dealId": "516035590389", "dealName": "Olano Seafood Iberica SA - Tier1", "companyName": "Olano Seafood Iberica SA", "ownerId": "30080242", "fromStageId": "1452704954", "toStageId": "1452704955", "timestamp": "2026-09-22T10:17:47.206Z" },
+    { "dealId": "508105253088", "dealName": "Derivats Hivernacle - New Deal", "companyName": "Derivats Hivernacle", "ownerId": "33763722", "fromStageId": "1452704955", "toStageId": "1895535834", "timestamp": "2026-09-22T10:18:21.006Z" }
+  ],
+  "meetings": [
+    { "meetingId": "521162222824", "dealId": "508105253088", "dealName": "Derivats Hivernacle - New Deal", "companyName": "Derivats Hivernacle", "ownerId": "33763722", "bookedAt": "2026-09-22T10:33:14.434Z", "meetingAt": "2026-09-29T14:30:00Z", "outcome": "SCHEDULED", "fleetSize": 4 }
+  ],
   "pipelineDeals": []
 }
