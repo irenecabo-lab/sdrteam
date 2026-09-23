@@ -1,11 +1,11 @@
 {
-  "_comment": "Día 1 (22/9/26) de la ventana real. Verificado vía HubSpot MCP y confirmado por Marti. NOTA sobre el Meeting Scheduled de Derivats Hivernacle (deal 508105253088): el owner actual en HubSpot es Joel (44080801), pero Marti confirmó que la reunión la agendó Lidia (33763722) - hubo un traspaso posterior que no es visible por MCP (sin acceso a propertiesWithHistory), así que aquí el ownerId sigue el criterio de Marti, no el campo owner del deal. También confirmado por Marti: el deal es outbound pese a que unified_leads_source dice 'CALL (INCOMING, COLD)' (contradice lead_master_source=false). Excluido de este volcado: deal 'Kanguro Exprésjmartin new lead' (509989934312) por ser inbound (lead_master_source=true) y no pertenecer al pipeline España.",
+  "_comment": "Día 1 (22/9/26) de la ventana real, CORREGIDO el 23/9/26: la primera subida solo cubría hasta mediodía (~14:24 CEST), así que faltaba toda la actividad de la tarde. Ahora cubre el día completo (00:00-24:00 Madrid), verificado vía HubSpot MCP y confirmado por Marti. Owner de Meeting Scheduled: Marti confirmó que el SDR owner real manda sobre el campo owner del deal en HubSpot - tanto Derivats Hivernacle (508105253088, owner HubSpot=Joel) como Landfillsolutions (499026403522, owner HubSpot=Joel) las agendó Lidia, así que ownerId=33763722 en ambas (sin acceso a propertiesWithHistory vía MCP para verificar el traspaso directamente). Ambos deals son outbound confirmado por Marti pese a que unified_leads_source dice 'CALL (INCOMING, COLD)' (contradice lead_master_source=false). Excluidos: 'Kanguro Exprésjmartin new lead' (509989934312, inbound, fuera del pipeline España), y dos Meeting Scheduled de Miguel Ángel Ropero y Carlos Preil (Account Executives, no SDRs del equipo, y además inbound).",
   "dailyActivity": [
-    { "ownerId": "30080242", "date": "2026-09-22", "calls": 41, "talkTimeMinutes": 46.2, "qualityCalls": 4 },
-    { "ownerId": "33763722", "date": "2026-09-22", "calls": 37, "talkTimeMinutes": 44.5, "qualityCalls": 5 },
-    { "ownerId": "78282993", "date": "2026-09-22", "calls": 28, "talkTimeMinutes": 26.6, "qualityCalls": 2 },
-    { "ownerId": "44080801", "date": "2026-09-22", "calls": 16, "talkTimeMinutes": 16.0, "qualityCalls": 2 },
-    { "ownerId": "30080243", "date": "2026-09-22", "calls": 3, "talkTimeMinutes": 23.6, "qualityCalls": 2 }
+    { "ownerId": "30080242", "date": "2026-09-22", "calls": 51, "talkTimeMinutes": 63.9, "qualityCalls": 6 },
+    { "ownerId": "33763722", "date": "2026-09-22", "calls": 63, "talkTimeMinutes": 67.5, "qualityCalls": 7 },
+    { "ownerId": "78282993", "date": "2026-09-22", "calls": 58, "talkTimeMinutes": 43.0, "qualityCalls": 3 },
+    { "ownerId": "44080801", "date": "2026-09-22", "calls": 68, "talkTimeMinutes": 51.4, "qualityCalls": 6 },
+    { "ownerId": "30080243", "date": "2026-09-22", "calls": 5, "talkTimeMinutes": 24.4, "qualityCalls": 2 }
   ],
   "dealStageEvents": [
     { "dealId": "508132341960", "dealName": "Jardín Móvil - New Deal", "companyName": "Jardín Móvil", "ownerId": "30080242", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T09:35:59.260Z" },
@@ -18,11 +18,27 @@
     { "dealId": "508117966029", "dealName": "NIS Motion® - New Deal", "companyName": "NIS Motion®", "ownerId": "30080242", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T09:35:59.891Z" },
     { "dealId": "508085640398", "dealName": "Jardines Olivina SL - New Deal", "companyName": "Jardines Olivina SL", "ownerId": "30080242", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T09:35:59.105Z" },
     { "dealId": "508178005196", "dealName": "Lluis Jardins Madremanya - New Deal", "companyName": "Lluis Jardins Madremanya", "ownerId": "30080242", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T09:35:58.932Z" },
+    { "dealId": "522300092657", "dealName": "Mclean - New Deal", "companyName": "Mclean", "ownerId": "33763722", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T13:06:32.493Z" },
+    { "dealId": "498959979751", "dealName": "EXEA Medio Ambiente - New Deal", "companyName": "EXEA Medio Ambiente", "ownerId": "33763722", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T13:46:12.052Z" },
+    { "dealId": "499034694864", "dealName": "SUDS - Atlantis - New Deal", "companyName": "SUDS - Atlantis", "ownerId": "33763722", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T13:46:24.333Z" },
+    { "dealId": "499004615877", "dealName": "Gauss International Consulting - New Deal", "companyName": "Gauss International Consulting", "ownerId": "33763722", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T13:46:16.804Z" },
+    { "dealId": "499024537790", "dealName": "dAAt CONSULTA, SL - New Deal", "companyName": "dAAt CONSULTA, SL", "ownerId": "33763722", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T13:46:07.218Z" },
+    { "dealId": "499044988105", "dealName": "ASEGRE - New Deal", "companyName": "ASEGRE", "ownerId": "33763722", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T13:45:58.609Z" },
+    { "dealId": "498999693531", "dealName": "Cambium.Earth - New Deal", "companyName": "Cambium.Earth", "ownerId": "33763722", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T13:43:35.837Z" },
+    { "dealId": "485527843034", "dealName": "Grupo Carreras - New Deal", "companyName": "Grupo Carreras", "ownerId": "33763722", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T14:10:21.651Z" },
+    { "dealId": "485498935528", "dealName": "In Side Logistics - New Deal", "companyName": "In Side Logistics", "ownerId": "33763722", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T14:10:50.125Z" },
+    { "dealId": "485486359782", "dealName": "MB92 La Ciotat - New Deal", "companyName": "MB92 La Ciotat", "ownerId": "33763722", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T14:14:49.448Z" },
+    { "dealId": "485498935526", "dealName": "Sparber Group - New Deal", "companyName": "Sparber Group", "ownerId": "33763722", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T14:18:38.672Z" },
+    { "dealId": "484967078126", "dealName": "Zeleros - New Deal", "companyName": "Zeleros", "ownerId": "33763722", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T14:25:26.299Z" },
+    { "dealId": "485482759355", "dealName": "Immfly - New Deal", "companyName": "Immfly", "ownerId": "33763722", "fromStageId": "1533160648", "toStageId": "1452704954", "timestamp": "2026-09-22T14:28:14.431Z" },
     { "dealId": "516035590389", "dealName": "Olano Seafood Iberica SA - Tier1", "companyName": "Olano Seafood Iberica SA", "ownerId": "30080242", "fromStageId": "1452704954", "toStageId": "1452704955", "timestamp": "2026-09-22T10:17:47.206Z" },
-    { "dealId": "508105253088", "dealName": "Derivats Hivernacle - New Deal", "companyName": "Derivats Hivernacle", "ownerId": "33763722", "fromStageId": "1452704955", "toStageId": "1895535834", "timestamp": "2026-09-22T10:18:21.006Z" }
+    { "dealId": "496048442574", "dealName": "ABM 04.2026 Vilella Recicla", "companyName": "Vilella Recicla", "ownerId": "30080242", "fromStageId": "1452704954", "toStageId": "1452704955", "timestamp": "2026-09-22T13:02:22.915Z" },
+    { "dealId": "508105253088", "dealName": "Derivats Hivernacle - New Deal", "companyName": "Derivats Hivernacle", "ownerId": "33763722", "fromStageId": "1452704955", "toStageId": "1895535834", "timestamp": "2026-09-22T10:18:21.006Z" },
+    { "dealId": "499026403522", "dealName": "Landfillsolutions en español - New Deal", "companyName": "Landfillsolutions", "ownerId": "33763722", "fromStageId": "1452704955", "toStageId": "1895535834", "timestamp": "2026-09-22T14:52:26.246Z" }
   ],
   "meetings": [
-    { "meetingId": "521162222824", "dealId": "508105253088", "dealName": "Derivats Hivernacle - New Deal", "companyName": "Derivats Hivernacle", "ownerId": "33763722", "bookedAt": "2026-09-22T10:33:14.434Z", "meetingAt": "2026-09-29T14:30:00Z", "outcome": "SCHEDULED", "fleetSize": 4 }
+    { "meetingId": "521162222824", "dealId": "508105253088", "dealName": "Derivats Hivernacle - New Deal", "companyName": "Derivats Hivernacle", "ownerId": "33763722", "bookedAt": "2026-09-22T10:33:14.434Z", "meetingAt": "2026-09-29T14:30:00Z", "outcome": "SCHEDULED", "fleetSize": 4 },
+    { "meetingId": "521254181099", "dealId": "499026403522", "dealName": "Landfillsolutions en español - New Deal", "companyName": "Landfillsolutions", "ownerId": "33763722", "bookedAt": "2026-09-22T14:59:08.871Z", "meetingAt": "2026-09-28T14:00:00Z", "outcome": "SCHEDULED", "fleetSize": 3 }
   ],
   "pipelineDeals": []
 }
