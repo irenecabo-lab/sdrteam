@@ -77,8 +77,12 @@ export function fleetTierFor(fleetSize: number) {
 // threshold. The +50 bonus fires when the MEETING is created for that deal
 // (not at deal creation, not at any later stage). UI label is "BOOST POR
 // EMPRESAS TOCHAS" - "tocha" is kept as the internal name only.
+// Rebajado de 50 a 20 el 25/9/26 (pedido por Marti: la competición estaba
+// muy descompensada a favor de TEAM 2, en parte por este boost). Se aplica
+// con carácter retroactivo porque tochaPoints se recalcula siempre desde
+// este valor, no desde puntos guardados - afecta también a GARCIA RIERA.
 export const TOCHA_MIN_FLEET_SIZE = 50;
-export const TOCHA_BONUS_POINTS = 50;
+export const TOCHA_BONUS_POINTS = 20;
 
 // ---------- Pipeline ----------
 // Linear conversion, no cap: every EUR_PER_POINT of amount_in_home_currency
