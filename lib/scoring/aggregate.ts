@@ -6,8 +6,27 @@ import { scoreTeamBonuses, buildCaptureFeed, findBiggestCapture } from "./bonuse
 import { computeXp } from "./xp";
 import { competitionDates, isWithinCompetitionWindow, timeLeft, toLocalDate, todayLocal } from "@/lib/date";
 import { fleetTierFor } from "@/config/scoring.config";
+import { isScoringExcluded } from "@/config/exclusions.config";
+import { manualBonusesFor, manualBonusPointsFor } from "@/config/manualBonuses.config";
 
 const TEAM_IDS: TeamId[] = ["TEAM_1", "TEAM_2"];
+
+/**
+ * Strips out any real activity/events that are deliberately excluded from
+ * scoring for a given owner+day (config/exclusions.config.ts) - e.g. Marti
+ * asking not to count her own points on a given day. The underlying
+ * snapshot (and data/competition-data.json) is never touched by this; it
+ * only affects what the scoring engine sees.
+ */
+function applyScoringExclusions(snapshot: CompetitionSnapshot): CompetitionSnapshot {
+  return {
+    ...snapshot,
+    dailyActivity: snapshot.dailyActivity.filter((r) => !isScoringExcluded(r.ownerId, r.date)),
+    dealStageEvents: snapshot.dealStageEvents.filter((e) => !isScoringExcluded(e.ownerId, toLocalDate(e.timestamp))),
+    meetings: snapshot.meetings.filter((m) => !isScoringExcluded(m.ownerId, toLocalDate(m.bookedAt))),
+    pipelineDeals: snapshot.pipelineDeals.filter((d) => !isScoringExcluded(d.ownerId, toLocalDate(d.createdAt))),
+  };
+}
 
 function meetingsBookedByOwner(snapshot: CompetitionSnapshot, dateFilter: (d: string) => boolean) {
   const map = new Map<string, number>();
@@ -40,7 +59,8 @@ function scoreWindow(snapshot: CompetitionSnapshot, dateFilter: (d: string) => b
   return teamPoints;
 }
 
-export function computeCompetitionState(snapshot: CompetitionSnapshot) {
+export function computeCompetitionState(rawSnapshot: CompetitionSnapshot) {
+  const snapshot = applyScoringExclusions(rawSnapshot);
   const fullWindow = (d: string) => isWithinCompetitionWindow(d);
   const numDays = competitionDates().length;
 
@@ -53,7 +73,9 @@ export function computeCompetitionState(snapshot: CompetitionSnapshot) {
       const totals = sumDailyActivity(snapshot.dailyActivity, team, bookedByOwnerFull);
       const activity = scoreTeamActivity(totals, team, numDays);
       const bonuses = scoreTeamBonuses(team, snapshot.dailyActivity, snapshot.meetings, snapshot.pipelineDeals);
-      const totalPoints = Math.round((stagePoints[team] + activity.points + bonuses.total) * 10) / 10;
+      const manualBonuses = manualBonusesFor(team);
+      const manualBonusPoints = manualBonusPointsFor(team);
+      const totalPoints = Math.round((stagePoints[team] + activity.points + bonuses.total + manualBonusPoints) * 10) / 10;
       const xpInfo = computeXp(totalPoints);
 
       const teamMeetings = snapshot.meetings.filter(
@@ -70,6 +92,8 @@ export function computeCompetitionState(snapshot: CompetitionSnapshot) {
           stagePoints: stagePoints[team],
           activity,
           bonuses,
+          manualBonuses,
+          manualBonusPoints,
           totalPoints,
           ...xpInfo,
         },
