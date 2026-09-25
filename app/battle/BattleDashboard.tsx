@@ -247,6 +247,9 @@ export default function BattleDashboard({ state }: { state: DashboardState }) {
                       <BonusLine label="🐾 Capturas de flota" value={team.bonuses.fleetCapturePoints} />
                       <BonusLine label="🐉 Boost empresas tochas" value={team.bonuses.tochaPoints} />
                       <BonusLine label="💰 Pipeline" value={team.bonuses.pipelinePoints} />
+                      {team.manualBonuses.map((b: { label: string; points: number }, i: number) => (
+                        <BonusLine key={i} label={`🧹 ${b.label}`} value={b.points} />
+                      ))}
                     </div>
                   </div>
                 );
