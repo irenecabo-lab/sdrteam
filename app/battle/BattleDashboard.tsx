@@ -212,7 +212,7 @@ export default function BattleDashboard({ state }: { state: DashboardState }) {
 
                     <div className="grid grid-cols-3 gap-3 mb-4">
                       <Stat label="📞 Llamadas" value={team.totals.calls} sub={`${team.activity.completionPct.calls}% objetivo`} />
-                      <Stat label="⏱ Minutos en conversación" value={team.totals.talkTimeMinutes} sub={`${team.activity.completionPct.talkTimeMinutes}% objetivo`} />
+                      <Stat label="⏱ Minutos en conversación" value={Math.round(team.totals.talkTimeMinutes)} sub={`${team.activity.completionPct.talkTimeMinutes}% objetivo`} />
                       <Stat label="📅 Meetings agendadas" value={team.totals.meetingsBooked} sub={`${team.activity.completionPct.meetingsBooked}% objetivo`} />
                       <Stat label="✅ Meetings celebradas" value={team.totals.meetingsHeld} />
                       <Stat
@@ -491,7 +491,7 @@ function PerSdrTable({ state }: { state: DashboardState }) {
                         {r.ownerId === topCallerId && <span className="ml-1.5">🥇</span>}
                       </td>
                       <td className="py-2.5 px-3 text-right font-mono-stat">{r.calls}</td>
-                      <td className="py-2.5 px-3 text-right font-mono-stat">{r.talkTimeMinutes}</td>
+                      <td className="py-2.5 px-3 text-right font-mono-stat">{Math.round(r.talkTimeMinutes)}</td>
                       <td className="py-2.5 px-3 text-right font-mono-stat">{r.qualityCalls}</td>
                       <td className="py-2.5 px-3 text-right font-mono-stat">{r.meetingsBooked}</td>
                       <td className="py-2.5 px-3 text-right font-mono-stat">{r.meetingsHeld}</td>
@@ -505,7 +505,7 @@ function PerSdrTable({ state }: { state: DashboardState }) {
                     <td className="py-2.5 pl-5 pr-3 font-pixel text-[8px] tracking-widest text-slate-500">TOTAL</td>
                     <td className="py-2.5 px-3 text-right font-mono-stat">{rows.reduce((a, r) => a + r.calls, 0)}</td>
                     <td className="py-2.5 px-3 text-right font-mono-stat">
-                      {rows.reduce((a, r) => a + r.talkTimeMinutes, 0)}
+                      {Math.round(rows.reduce((a, r) => a + r.talkTimeMinutes, 0))}
                     </td>
                     <td className="py-2.5 px-3 text-right font-mono-stat">
                       {rows.reduce((a, r) => a + r.qualityCalls, 0)}
