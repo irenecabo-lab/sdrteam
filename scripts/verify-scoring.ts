@@ -20,13 +20,13 @@ async function main() {
   for (const teamId of teamIds) {
     const team = state.teams[teamId];
     console.log(
-      `\n${TEAMS[teamId].name} (${TEAMS[teamId].nickname}): ${team.totalPoints} pts | stage ${team.stagePoints} + activity ${team.activity.points} + bonuses ${team.bonuses.total}`
+      `\n${TEAMS[teamId].name} (${TEAMS[teamId].nickname}): ${team.totalPoints} pts | stage ${team.stagePoints} + activity ${team.activity.points} + bonuses ${team.bonuses.total} + manual ${team.manualBonusPoints}`
     );
     check(`${teamId} totalPoints is a finite, non-negative number`, Number.isFinite(team.totalPoints) && team.totalPoints >= 0);
     check(`${teamId} stagePoints is a finite, non-negative number`, Number.isFinite(team.stagePoints) && team.stagePoints >= 0);
     check(
-      `${teamId} totalPoints = stagePoints + activity.points + bonuses.total (rounded)`,
-      Math.abs(team.totalPoints - (team.stagePoints + team.activity.points + team.bonuses.total)) < 0.11
+      `${teamId} totalPoints = stagePoints + activity.points + bonuses.total + manualBonusPoints (rounded)`,
+      Math.abs(team.totalPoints - (team.stagePoints + team.activity.points + team.bonuses.total + team.manualBonusPoints)) < 0.11
     );
   }
 
